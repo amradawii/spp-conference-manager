@@ -62,6 +62,8 @@ export interface Day {
 export interface Conference {
     id: number;
     name: string;
+    /** Relative URL of the board, e.g. "/s/{token}". All write routes hang off it. */
+    url: string;
     cities: { conference: string; team: string };
     days: Day[];
 }

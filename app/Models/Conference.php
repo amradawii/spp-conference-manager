@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
+use InvalidArgumentException;
 
 class Conference extends Model
 {
@@ -53,5 +54,21 @@ class Conference extends Model
     public function days(): HasMany
     {
         return $this->hasMany(Day::class)->chaperone()->orderBy('date');
+    }
+
+    /**
+     * Nested route parameters ({session}, {item}, {note}) only resolve to
+     * records that belong to this conference.
+     */
+    public function resolveChildRouteBinding($childType, $value, $field): ?Model
+    {
+        $query = match ($childType) {
+            'session' => ConferenceSession::query()->forConference($this),
+            'item' => AgendaItem::query()->forConference($this),
+            'note' => Note::query()->forConference($this),
+            default => throw new InvalidArgumentException("Unknown child binding [{$childType}]."),
+        };
+
+        return $query->where($field ?? 'id', $value)->first();
     }
 }

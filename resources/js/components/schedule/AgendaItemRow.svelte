@@ -1,15 +1,16 @@
 <script lang="ts">
-    import StatusPill from '@/components/ui/StatusPill.svelte';
-    import { pluralize } from '@/lib/format';
+    import Highlight from '@/components/ui/Highlight.svelte';
+    import { getBoard } from '@/lib/board';
+    import { formatRelative } from '@/lib/format';
     import { hasSpeaker, isAtRisk, isTopicTbd, itPresents, tracksAssets } from '@/lib/stats';
-    import { assetsStatusOptions, speakerStatusOptions } from '@/lib/status';
-    import type { AgendaItem, Conference } from '@/types/models';
+    import type { AgendaItem } from '@/types/models';
+    import RecordActions from './RecordActions.svelte';
+    import StatusMenu from './StatusMenu.svelte';
     import TimeRange from './TimeRange.svelte';
 
-    let { item, cities }: { item: AgendaItem; cities: Conference['cities'] } = $props();
+    let { item }: { item: AgendaItem } = $props();
 
-    const speaker = $derived(speakerStatusOptions[item.speaker_status]);
-    const assets = $derived(assetsStatusOptions[item.assets_status]);
+    const board = getBoard();
     const details = $derived([item.speaker_role, item.affiliation].filter(Boolean).join(' · '));
     const atRisk = $derived(isAtRisk(item));
 </script>
@@ -20,7 +21,7 @@
     {/if}
 
     <div class="md:pt-0.5">
-        <TimeRange time={item.time} {cities} emptyLabel="Within session" />
+        <TimeRange time={item.time} cities={board.cities} emptyLabel="Within session" />
     </div>
 
     <div class="min-w-0">
@@ -29,9 +30,11 @@
         {/if}
 
         {#if hasSpeaker(item)}
-            <p class="mt-0.5 text-[15px] font-semibold text-ink-900">{item.speaker_name}</p>
+            <p class="mt-0.5 text-[15px] font-semibold text-ink-900">
+                <Highlight text={item.speaker_name ?? ''} query={board.query} />
+            </p>
             {#if details}
-                <p class="mt-0.5 text-sm leading-snug text-ink-500">{details}</p>
+                <p class="mt-0.5 text-sm leading-snug text-ink-500"><Highlight text={details} query={board.query} /></p>
             {/if}
 
             {#if isTopicTbd(item)}
@@ -41,7 +44,9 @@
                     </span>
                 </p>
             {:else}
-                <p class="mt-2 font-serif text-[15.5px] leading-snug text-ink-800">{item.title}</p>
+                <p class="mt-2 font-serif text-[15.5px] leading-snug text-ink-800">
+                    <Highlight text={item.title ?? ''} query={board.query} />
+                </p>
             {/if}
 
             {#if item.emails.length}
@@ -51,27 +56,29 @@
                             href="mailto:{email}"
                             class="break-all text-ink-500 underline decoration-ink-200 underline-offset-4 transition-colors hover:text-ink-900 hover:decoration-ink-400"
                         >
-                            {email}
+                            <Highlight text={email} query={board.query} />
                         </a>
                     {/each}
                 </p>
             {/if}
         {:else}
-            <p class="text-sm leading-relaxed whitespace-pre-line text-ink-600 {item.label ? 'mt-0.5' : ''}">{item.title}</p>
+            <p class="text-sm leading-relaxed whitespace-pre-line text-ink-600 {item.label ? 'mt-0.5' : ''}">
+                <Highlight text={item.title ?? ''} query={board.query} />
+            </p>
         {/if}
     </div>
 
-    <div class="flex flex-col gap-2 md:pt-0.5">
+    <div class="flex flex-col gap-2.5 md:pt-0.5">
         {#if hasSpeaker(item)}
             <dl class="flex flex-wrap gap-x-5 gap-y-2 md:flex-col">
                 <div class="flex items-center gap-2.5">
                     <dt class="w-14 text-xs text-ink-500">Speaker</dt>
-                    <dd><StatusPill tone={speaker.tone} label={speaker.label} /></dd>
+                    <dd><StatusMenu {item} field="speaker" /></dd>
                 </div>
                 {#if tracksAssets(item)}
                     <div class="flex items-center gap-2.5">
                         <dt class="w-14 text-xs text-ink-500">Assets</dt>
-                        <dd><StatusPill tone={assets.tone} label={assets.label} /></dd>
+                        <dd><StatusMenu {item} field="assets" /></dd>
                     </div>
                 {/if}
             </dl>
@@ -83,8 +90,16 @@
             {/if}
         {/if}
 
-        {#if item.notes.length}
-            <p class="text-xs text-ink-500">{pluralize(item.notes.length, 'note')}</p>
+        <RecordActions
+            notesCount={item.notes.length}
+            onNotes={() => board.openNotes({ type: 'item', id: item.id })}
+            onEdit={() => board.editItem(item)}
+        />
+
+        {#if item.updated_by}
+            <p class="text-xs text-ink-400" title={new Date(item.updated_at).toLocaleString()}>
+                {item.updated_by} · {formatRelative(item.updated_at)}
+            </p>
         {/if}
     </div>
 </li>

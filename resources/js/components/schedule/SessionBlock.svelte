@@ -1,12 +1,16 @@
 <script lang="ts">
-    import { pluralize } from '@/lib/format';
+    import Highlight from '@/components/ui/Highlight.svelte';
+    import { getBoard } from '@/lib/board';
+    import { formatRelative } from '@/lib/format';
     import { missingModerators } from '@/lib/stats';
-    import type { Conference, ConferenceSession } from '@/types/models';
+    import type { ConferenceSession } from '@/types/models';
     import AgendaItemRow from './AgendaItemRow.svelte';
+    import RecordActions from './RecordActions.svelte';
     import TimeRange from './TimeRange.svelte';
 
-    let { session, cities }: { session: ConferenceSession; cities: Conference['cities'] } = $props();
+    let { session }: { session: ConferenceSession } = $props();
 
+    const board = getBoard();
     const isSession = $derived(session.kind === 'session');
     const missing = $derived(missingModerators(session));
     const moderators = $derived([
@@ -21,18 +25,22 @@
 >
     <header class="grid gap-3 px-5 py-5 sm:px-6 md:grid-cols-[9.5rem_minmax(0,1fr)_15rem] md:gap-6 {isSession ? '' : 'bg-ink-50/60'}">
         <div class="md:pt-0.5">
-            <TimeRange time={session.time} {cities} />
+            <TimeRange time={session.time} cities={board.cities} />
         </div>
 
         <div class="min-w-0">
             <p class="label-caps text-ink-500">{isSession ? `Session ${session.number}` : 'Plenary'}</p>
             {#if session.journal}
-                <h3 class="mt-1 font-serif text-xl leading-snug font-semibold text-ink-900">{session.journal}</h3>
+                <h3 class="mt-1 font-serif text-xl leading-snug font-semibold text-ink-900">
+                    <Highlight text={session.journal} query={board.query} />
+                </h3>
                 {#if session.title}
-                    <p class="mt-1 text-[15px] leading-snug text-ink-600">{session.title}</p>
+                    <p class="mt-1 text-[15px] leading-snug text-ink-600"><Highlight text={session.title} query={board.query} /></p>
                 {/if}
             {:else if session.title}
-                <h3 class="mt-1 font-serif text-xl leading-snug font-semibold text-ink-900">{session.title}</h3>
+                <h3 class="mt-1 font-serif text-xl leading-snug font-semibold text-ink-900">
+                    <Highlight text={session.title} query={board.query} />
+                </h3>
             {/if}
 
             {#if isSession}
@@ -46,8 +54,15 @@
                                         <span class="size-1.5 rounded-full bg-amber-500" aria-hidden="true"></span>
                                         Not assigned
                                     </span>
+                                    <button
+                                        type="button"
+                                        onclick={() => board.editSession(session)}
+                                        class="ml-1.5 text-xs font-medium text-ink-600 underline decoration-ink-200 underline-offset-4 hover:text-ink-900"
+                                    >
+                                        Assign
+                                    </button>
                                 {:else}
-                                    <span class="font-medium text-ink-900">{moderator.name}</span>
+                                    <span class="font-medium text-ink-900"><Highlight text={moderator.name ?? ''} query={board.query} /></span>
                                 {/if}
                             </dd>
                         </div>
@@ -56,9 +71,16 @@
             {/if}
         </div>
 
-        <div class="text-xs text-ink-500 md:pt-0.5">
-            {#if session.notes.length}
-                {pluralize(session.notes.length, 'note')}
+        <div class="flex flex-col gap-1.5 md:pt-0.5">
+            <RecordActions
+                notesCount={session.notes.length}
+                onNotes={() => board.openNotes({ type: 'session', id: session.id })}
+                onEdit={() => board.editSession(session)}
+            />
+            {#if session.updated_by}
+                <p class="text-xs text-ink-400" title={new Date(session.updated_at).toLocaleString()}>
+                    {session.updated_by} · {formatRelative(session.updated_at)}
+                </p>
             {/if}
         </div>
     </header>
@@ -66,8 +88,20 @@
     {#if session.items.length}
         <ol class="divide-y divide-line border-t border-line">
             {#each session.items as item (item.id)}
-                <AgendaItemRow {item} {cities} />
+                <AgendaItemRow {item} />
             {/each}
         </ol>
+    {/if}
+
+    {#if !board.isFiltering}
+        <div class="border-t border-line px-5 py-2 sm:px-6">
+            <button
+                type="button"
+                onclick={() => board.addItem(session)}
+                class="-ml-1.5 rounded-md px-1.5 py-1 text-xs font-medium text-ink-500 transition-colors hover:bg-ink-50 hover:text-ink-800"
+            >
+                + Add item to this {isSession ? 'session' : 'block'}
+            </button>
+        </div>
     {/if}
 </article>

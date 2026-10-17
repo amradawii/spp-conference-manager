@@ -13,6 +13,38 @@ export function formatDay(date: string): string {
     return dayFormatter.format(parseDate(date));
 }
 
+const shortDayFormatter = new Intl.DateTimeFormat('en-GB', { weekday: 'short', day: 'numeric', month: 'short', timeZone: 'UTC' });
+
+/** "2026-10-24" → "Sat 24 Oct" */
+export function formatShortDay(date: string): string {
+    return shortDayFormatter.format(parseDate(date));
+}
+
+const relativeFormatter = new Intl.RelativeTimeFormat('en', { numeric: 'auto', style: 'short' });
+const clockFormatter = new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+
+/** "just now", "5 min ago", "3 hr ago", "yesterday", or "17 Oct, 10:42" for anything older. */
+export function formatRelative(iso: string, now: Date = new Date()): string {
+    const seconds = Math.round((new Date(iso).getTime() - now.getTime()) / 1000);
+    const abs = Math.abs(seconds);
+
+    if (abs < 45) return 'just now';
+    if (abs < 3600) return relativeFormatter.format(Math.round(seconds / 60), 'minute');
+    if (abs < 86400) return relativeFormatter.format(Math.round(seconds / 3600), 'hour');
+    if (abs < 172800) return relativeFormatter.format(Math.round(seconds / 86400), 'day');
+
+    return clockFormatter.format(new Date(iso));
+}
+
+/** "09:30" shifted by 2 hours → "11:30" (wraps around midnight). */
+export function shiftTime(time: string, hours: number): string {
+    const match = /^(\d{1,2}):(\d{2})/.exec(time);
+    if (!match) return '';
+
+    const minutes = (((Number(match[1]) * 60 + Number(match[2]) + Math.round(hours * 60)) % 1440) + 1440) % 1440;
+    return `${String(Math.floor(minutes / 60)).padStart(2, '0')}:${String(minutes % 60).padStart(2, '0')}`;
+}
+
 /** ["2026-10-24", "2026-10-25"] → "24–25 October 2026" */
 export function formatDateSpan(dates: string[]): string {
     if (dates.length === 0) return '';

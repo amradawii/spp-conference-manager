@@ -6,6 +6,7 @@ use App\Enums\AgendaItemType;
 use App\Enums\AssetsStatus;
 use App\Enums\SpeakerStatus;
 use Database\Factories\AgendaItemFactory;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -41,6 +42,19 @@ class AgendaItem extends Model
             'emails' => 'array',
             'position' => 'integer',
         ];
+    }
+
+    protected static function booted(): void
+    {
+        static::deleting(fn (AgendaItem $item) => $item->notes()->delete());
+    }
+
+    /**
+     * @param  Builder<AgendaItem>  $query
+     */
+    public function scopeForConference(Builder $query, Conference $conference): void
+    {
+        $query->whereHas('conferenceSession.day', fn (Builder $day) => $day->where('conference_id', $conference->id));
     }
 
     /** @return BelongsTo<ConferenceSession, $this> */

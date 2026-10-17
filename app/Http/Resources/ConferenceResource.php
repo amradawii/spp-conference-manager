@@ -17,6 +17,7 @@ class ConferenceResource extends JsonResource
         return [
             'id' => $this->id,
             'name' => $this->name,
+            'url' => route('schedule.show', $this->resource, absolute: false),
             'cities' => [
                 'conference' => Conference::cityOf($this->timezone),
                 'team' => Conference::cityOf($this->team_timezone),

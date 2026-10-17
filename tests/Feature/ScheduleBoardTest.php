@@ -56,7 +56,7 @@ class ScheduleBoardTest extends TestCase
 
         $this->get(route('schedule.show', $conference))
             ->assertSee('<meta name="robots" content="noindex, nofollow">', false)
-            ->assertSee('<meta name="referrer" content="no-referrer">', false);
+            ->assertSee('<meta name="referrer" content="same-origin">', false);
     }
 
     public function test_times_are_shown_in_conference_and_team_timezones_across_the_clock_change(): void

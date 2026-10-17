@@ -1,6 +1,6 @@
 import type { Day } from '@/types/models';
 import { describe, expect, it } from 'vitest';
-import { formatDateSpan, formatDay, formatUtcOffset, pluralize, teamLeadHours } from './format';
+import { formatDateSpan, formatDay, formatRelative, formatUtcOffset, pluralize, shiftTime, teamLeadHours } from './format';
 
 function dayWithOffsets(conference: string, team: string): Day {
     return { id: 1, date: '2026-10-24', title: '', time: null, utc_offsets: { conference, team }, sessions: [] };
@@ -31,5 +31,20 @@ describe('format', () => {
     it('pluralizes', () => {
         expect(pluralize(1, 'note')).toBe('1 note');
         expect(pluralize(3, 'note')).toBe('3 notes');
+    });
+
+    it('shifts programme times into the team timezone', () => {
+        expect(shiftTime('09:30', 1)).toBe('10:30');
+        expect(shiftTime('23:15', 2)).toBe('01:15');
+        expect(shiftTime('', 2)).toBe('');
+    });
+
+    it('describes recent changes relative to now', () => {
+        const now = new Date('2026-10-17T12:00:00Z');
+
+        expect(formatRelative('2026-10-17T11:59:40Z', now)).toBe('just now');
+        expect(formatRelative('2026-10-17T11:55:00Z', now)).toBe('5 min. ago');
+        expect(formatRelative('2026-10-17T09:00:00Z', now)).toBe('3 hr. ago');
+        expect(formatRelative('2026-10-16T10:00:00Z', now)).toBe('yesterday');
     });
 });

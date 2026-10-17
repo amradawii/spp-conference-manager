@@ -94,8 +94,9 @@ admin panel (conferences are created with a seeder/artisan) · per-session Zoom 
    ┌ TIME ZONES ─ Every time is shown twice: Cairo first, then Prague… Day 1     ┐
    │ Cairo is 1 hour ahead (Prague UTC+2); Day 2 Cairo is 2 hours ahead (UTC+1). │
    └─────────────────────────────────────────────────────────────────────────────┘
-   [ All | Day 1 | Day 2 ]  [ Session: All ▾ ]  [ ⌕ Search speaker…   ]   (Phase 3)
-   [ Speaker: Any ▾ ]  [ Assets: Any ▾ ]          Showing 6 of 52 · Clear filters
+   [ All | Day 1 | Day 2 ]  [ Session: All ▾ ]  [ ⌕ Search keynotes…   / ]
+   [ Speaker: Any ▾ ]  [ Assets: Any ▾ ]
+   [At risk ×] Showing 6 of 38 speakers                          Clear filters
 
  DAY 1 · SUSTAINABLE MATERIALS                        10:00–16:30 Cairo  UTC+3   (sticky)
  Saturday 24 October                                  09:00–15:30 Prague UTC+2
@@ -123,8 +124,8 @@ admin panel (conferences are created with a seeder/artisan) · per-session Zoom 
                                                             + Add item to session
 ```
 
-- **Header:** dark navy band (the SPP logo has a white wordmark), app name, conference name, dates; later the editor chip and "Loaded HH:MM · Refresh".
-- **Summary card:** overlaps the header band. Counts for the current Day/Session scope. From Phase 3, clicking a counter applies the matching filter.
+- **Header:** dark navy band (the SPP logo has a white wordmark), app name, conference name, dates, "Loaded at HH:MM · Refresh" and "Editing as {name}" (click to change) or "Set your name".
+- **Summary card:** overlaps the header band. Counts for the current Day/Session scope. Each counter is a toggle that filters to the rows behind it: *Speakers confirmed* → pending speakers, *Assets ready* → pending assets (both show "N pending" under the bar), *Not attending*, *At risk*, *Topics TBD*, *Missing moderator*. Counters at 0 are disabled.
 - **Time zones notice:** explains the two times and the clock change. It is generated from the data, so it disappears if both days have the same gap.
 - **Day header:** sticky while scrolling through that day, with the day's span in both cities and their UTC offsets.
 - **Session block:** time (both cities), number, journal, title, both moderators, notes, Edit.
@@ -140,7 +141,9 @@ admin panel (conferences are created with a seeder/artisan) · per-session Zoom 
 │ │ Confirmed   │ Assets    │ │  summary: 2 columns
 │ │ 0/38        │ 0/38      │ │
 │ └─────────────┴───────────┘ │
-│ [All|Day 1|Day 2] [Filters 2]│  ← "Filters" opens a bottom drawer (Phase 3)
+│ [ All | Day 1 | Day 2 ]     │
+│ [ ⌕ Search…               ] │
+│ More filters (2)       Show │  ← expands inline: session, speaker, assets
 ├─────────────────────────────┤
 │ DAY 1 · Saturday 24 October │  sticky
 │ 10:00–16:30 Cairo           │
@@ -155,7 +158,7 @@ admin panel (conferences are created with a seeder/artisan) · per-session Zoom 
 └─────────────────────────────┘
 ```
 
-On phones the three columns stack: time, then details, then the status pills side by side.
+On phones the three columns stack: time, then details, then the status pills side by side. Drawers take the full width.
 
 ### 3.4 Statuses
 
@@ -185,27 +188,28 @@ Derived flags, computed on the client with no database column (`resources/js/lib
 
 | Action | Interaction |
 |---|---|
-| Change status | Click pill → small menu (dot + label + one-line hint) → select. Pill dims while saving → toast "Saved". |
-| Notes | "Notes (n)" opens a modal: newest first, author + relative time, textarea at the bottom, "Add note". Delete asks for confirmation. Available on items and sessions. |
+| Change status | Click pill → small menu (dot + label + one-line hint, "Current" marker) → select. The pill reads "Saving…" → toast "Status saved". |
+| Notes | "Add note" / "Notes (n)" opens a modal: textarea at the top (Ctrl+Enter submits, "Signed as {name}"), then notes newest first with author and relative time. Delete asks inline ("Delete this note for everyone?"). Available on items and sessions. |
 | Edit item / session | "Edit" opens a right-side drawer with a form. Moderators are edited here. Empty moderator fields show "Assign" as a link into the drawer. |
-| Add | "+ Add item to session" at the end of each session; "+ Add session" at the end of each day. Both open the same drawer. |
-| Delete | In the drawer footer, with confirmation naming the record ("Delete Keynote 2 – Prof. Veera Rajendran?"). |
-| Editor name | First write action without a name → modal "What's your name? It will appear next to your changes." Saved → original action runs. |
-| Copy email | Hovering an email shows "Copy" (useful for researchers contacting keynotes). |
-| Stale edit guard | If someone changed the record after you loaded the page, saving the drawer shows "Updated by Noha at 10:42 — reloaded the latest version" instead of overwriting. |
-| Keyboard | `/` focuses search · `Esc` closes modal/drawer/menu. |
+| Add | "+ Add item to this session" at the end of each session; "+ Add session to Day N" at the end of each day. Hidden while filtering, so new rows never land in a filtered-out place. |
+| Delete | In the drawer footer, with an inline confirmation naming the record ("Delete Prof. Veera Rajendran and its notes?", "Delete this session and its 7 items?"). |
+| Editor name | First write action without a name → modal "Who is making changes?". Saved → the original action runs. If the cookie is lost later, the server's `editor_name` error re-opens the modal and retries. |
+| Stale edit guard | If someone changed the record after you loaded the page, saving shows an amber notice: "Noha changed this at 11:07 (Cairo time) after you opened it. Close to see their version, or save again to replace it with yours." The button becomes "Save anyway". |
+| Errors | Toasts for a deleted record (404, then the board refreshes), an expired page (419), rate limit (429), server errors and lost connection. |
+| Keyboard | `/` focuses search · `Esc` clears the search, closes modal/drawer/menu. |
 
-Times are entered in the drawer in **Prague time** (the programme's time); the Cairo time is shown live next to the input.
+Times are entered in the drawer in **Prague time** (the programme's time); the Cairo time is shown live under the inputs ("That is 10:30–12:00 Cairo time on this day").
 
-### 3.7 Filters (Phase 3)
+### 3.7 Filters
 
-- **Day:** segmented control `All | Day 1 | Day 2`.
-- **Session:** select that depends on Day. With Day 1 selected it lists `Session 1 – Integrated Nano` … `Session 5`. With All it lists every session grouped by day. Changing Day resets Session.
-- **Search:** matches speaker name, topic and email; case- and accent-insensitive; matches are highlighted.
+- **Day:** segmented control `All | Day 1 · Sat 24 Oct | Day 2 · Sun 25 Oct`.
+- **Session:** select that depends on Day. With Day 1 selected it lists `Session 1 · IN` … `Session 5 · …` plus the plenary blocks. With All it lists every session grouped by day. Picking another day clears a session that isn't on it.
+- **Search:** matches speaker name, role, affiliation, topic, label and email, plus the session's journal, title and moderators (a session match keeps the whole session, so "Sara" lists every session she moderates). Case- and accent-insensitive (`Šárka` = `sarka`); matches are highlighted.
 - **Speaker status** and **Assets status** selects.
+- **Flag** (set from the summary counters): at risk, topic TBD, missing moderator. Shown as a removable chip.
 - All filters combine with AND. Sessions with no matching items are hidden. When no filter is active, every session is shown.
-- State lives in the query string: `?day=1&session=12&q=nader&speaker=pending&assets=pending`. Updated with `replaceState` (no history spam, no server round-trip).
-- Empty state: "No items match these filters · Clear filters".
+- State lives in the query string: `?day=1&session=12&q=nader&speaker=pending&assets=pending&flag=at_risk`. Updated 250 ms after typing stops, with Inertia's `router.replace` (no history spam, no server round-trip; keeps Inertia's history state intact). Invalid values in a pasted URL are ignored.
+- Empty state: "Nothing matches these filters" + "Clear filters".
 - Filtering runs **client-side** (≈60 rows), so it is instant.
 
 ### 3.8 Visual language: official, premium, modern, calm
@@ -215,8 +219,8 @@ Times are entered in the drawer in **Prague time** (the programme's time); the C
 - **Color:** warm off-white page (`canvas`), white surfaces, hairline warm borders (`line`), ink-navy text. The brand teal/green appears only as accents (header line, kicker label, progress bars, focus). Status colors appear only in soft tinted pills with a small dot.
 - **Shape and depth:** `rounded-xl` cards, a single soft shadow on the summary card, almost none elsewhere.
 - **Labels:** small caps, letter-spaced labels ("KEYNOTE 1", "SPP MODERATOR") instead of icons.
-- **Icons:** about 5 in total (search, chevron, close, refresh, copy), from `@lucide/svelte`. Actions use words ("Edit", "Notes"), not icon buttons.
-- **Motion:** 150 ms fades and slides for menus, drawer and toasts only.
+- **Icons:** 4 in total (search, chevron, close, filters), from `@lucide/svelte`. Actions use words ("Edit", "Notes", "Refresh"), not icon buttons.
+- **Motion:** almost none: colour transitions on hover and the progress bars. Menus, drawers and toasts appear instantly.
 - **Accessibility:** contrast ≥ 4.5:1, visible focus rings, status is never conveyed by color alone (always a label), dialogs trap focus.
 
 Tokens live in `resources/css/app.css` (Tailwind v4 `@theme`): `ink-50…950`, `canvas`, `line`, `line-strong`, `brand-300…600`, `brand-teal`, plus the `label-caps` utility.
@@ -351,23 +355,24 @@ fields above are exposed (the access token is never sent in props).
 
 ### 4.3 Routes
 
-All routes are scoped by the conference token. Write routes (Phase 4+) use the
-`editor` middleware and `throttle:60,1`.
+All routes are scoped by the conference token (`scopeBindings()` plus
+`Conference::resolveChildRouteBinding`). Write routes use the `editor`
+middleware and `throttle:60,1`; saving the name uses `throttle:20,1`.
 
 | Method | URI | Controller | Purpose | Phase |
 |---|---|---|---|---|
 | GET | `/` | `Route::inertia('Home')` | Plain page: "This schedule is private" | ✅ 2 |
 | GET | `/s/{conference:access_token}` | `ScheduleController@show` | The board | ✅ 2 |
-| POST | `/s/{token}/editor` | `EditorController@store` | Save editor name (cookie) | 4 |
-| PATCH | `/s/{token}/items/{item}/status` | `AgendaItemStatusController@update` | Quick status change | 4 |
-| POST | `/s/{token}/notes` | `NoteController@store` | Add note (`notable_type`, `notable_id`) | 5 |
-| DELETE | `/s/{token}/notes/{note}` | `NoteController@destroy` | Delete note | 5 |
-| POST | `/s/{token}/sessions` | `ConferenceSessionController@store` | Add session | 6 |
-| PUT | `/s/{token}/sessions/{session}` | `ConferenceSessionController@update` | Edit session details and moderators | 6 |
-| DELETE | `/s/{token}/sessions/{session}` | `ConferenceSessionController@destroy` | Delete session (and its items) | 6 |
-| POST | `/s/{token}/sessions/{session}/items` | `AgendaItemController@store` | Add item | 6 |
-| PUT | `/s/{token}/items/{item}` | `AgendaItemController@update` | Edit item details | 6 |
-| DELETE | `/s/{token}/items/{item}` | `AgendaItemController@destroy` | Delete item | 6 |
+| POST | `/s/{token}/editor` | `EditorController@store` | Save editor name (cookie) | ✅ 4 |
+| PATCH | `/s/{token}/items/{item}/status` | `AgendaItemStatusController@update` | Quick status change | ✅ 4 |
+| POST | `/s/{token}/notes` | `NoteController@store` | Add note (`notable_type`, `notable_id`) | ✅ 5 |
+| DELETE | `/s/{token}/notes/{note}` | `NoteController@destroy` | Delete note | ✅ 5 |
+| POST | `/s/{token}/sessions` | `ConferenceSessionController@store` | Add session | ✅ 6 |
+| PUT | `/s/{token}/sessions/{session}` | `ConferenceSessionController@update` | Edit session details and moderators | ✅ 6 |
+| DELETE | `/s/{token}/sessions/{session}` | `ConferenceSessionController@destroy` | Delete session (and its items) | ✅ 6 |
+| POST | `/s/{token}/sessions/{session}/items` | `AgendaItemController@store` | Add item | ✅ 6 |
+| PUT | `/s/{token}/items/{item}` | `AgendaItemController@update` | Edit item details | ✅ 6 |
+| DELETE | `/s/{token}/items/{item}` | `AgendaItemController@destroy` | Delete item | ✅ 6 |
 
 **Scoping rule:** child records are always looked up *through* the conference
 (e.g. `AgendaItem::forConference($conference)->findOrFail($id)`). A token for
@@ -375,15 +380,17 @@ one conference can never reach another conference's rows. A test covers this.
 
 ### 4.4 Backend building blocks
 
-- **Middleware `EnsureEditorName`** (write routes, Phase 4): reads the `editor_name` cookie. If it is missing, it redirects back with an `editor_name` error, and the frontend opens the name modal. The frontend normally asks first; this is the safety net.
+- **Middleware `EnsureEditorName`** (alias `editor`): reads the `editor_name` cookie via `App\Support\Editor`. If it is missing, it redirects back with an `editor_name` error, and the frontend opens the name modal and retries. The frontend normally asks first; this is the safety net.
 - **`EditorController@store`**: validates `name` (required, 2–60 chars) and sets `Cookie::forever('editor_name', …)`. Laravel cookies are encrypted.
-- **Form Requests:** `StoreSessionRequest`, `UpdateSessionRequest`, `StoreAgendaItemRequest`, `UpdateAgendaItemRequest`, `UpdateAgendaItemStatusRequest` (`speaker_status`/`assets_status` as `sometimes` + `Rule::enum`), `StoreNoteRequest`.
-- **Stale guard:** `Update*Request` requires `expected_updated_at`. If the record's `updated_at` differs, the request fails validation with "Updated by {name} at {time}". Status changes skip this guard (single-value, intentional clicks; last write wins).
-- **`HandleInertiaRequests` shared props:** `editor: { name }` (Phase 4) and flash messages.
+- **Form Requests:** `SaveConferenceSessionRequest` and `SaveAgendaItemRequest` (one each for create and update; the HTTP method decides what is required), `UpdateAgendaItemStatusRequest` (`speaker_status`/`assets_status`, at least one, `Rule::enum`; assets only Pending/Ready), `StoreNoteRequest`.
+- **Stale guard** (`GuardsAgainstStaleEdits`): updates require `expected_updated_at`. If the record's `updated_at` differs, an `after()` hook fails validation with a `stale` error naming who changed it and when (in the team's city). The drawer sends the timestamp from the current props, so after that error (which reloads the props) a second save intentionally wins. Status changes skip this guard (single-value, intentional clicks; last write wins).
+- **Model hooks:** deleting a session deletes its items' notes and its own notes (polymorphic rows aren't covered by foreign-key cascades); deleting an item deletes its notes.
+- **Item type rules:** segments never carry speaker fields and their assets are "Not needed"; turning a segment into a speaker item starts assets at Pending; editing details never changes statuses.
+- **`HandleInertiaRequests` shared props:** `editor: { name }`. Toasts use Inertia v3 flash data (`Inertia::flash('toast', …)`).
 - **Artisan:** `php artisan conference:link {conference?} {--rotate}` prints the team URL and, with `--rotate`, generates a new token (use it if the link leaks). ✅
-- **Privacy:** `<meta name="robots" content="noindex, nofollow">`, `<meta name="referrer" content="no-referrer">`, and `Disallow: /` in `robots.txt`. ✅
+- **Privacy:** `<meta name="robots" content="noindex, nofollow">`, `<meta name="referrer" content="same-origin">`, and `Disallow: /` in `robots.txt`. `same-origin` still hides the secret URL from other sites, but keeps the `Referer` header on our own requests, which Laravel's `back()` redirects need. ✅
 
-### 4.5 Frontend structure (as built, plus planned files)
+### 4.5 Frontend structure (as built)
 
 ```
 resources/
@@ -392,36 +399,36 @@ resources/
   js/
     app.ts                            createInertiaApp (pages resolved from ./pages)
     types/models.ts                   shared types
+    types/inertia.d.ts                typed shared props, flash data and errors
+    test/fixtures.ts                  builders for Vitest
     lib/
-      stats.ts (+ .test.ts)           summary counts + derived flags
-      format.ts (+ .test.ts)          dates, UTC offsets, team lead hours, pluralize
-      status.ts                       status labels and tones
-      filters.ts                      Phase 3: pure filter + URL (de)serialization
-      editor.svelte.ts                Phase 4: requireEditor(action)
-      routes.ts                       Phase 4: tiny typed URL helpers (no Ziggy)
+      stats.ts (+ test)               summary counts + derived flags
+      format.ts (+ test)              dates, UTC offsets, team lead hours, relative time, time shift
+      search.ts (+ test)              accent-insensitive matching + highlight parts
+      filters.ts (+ test)             pure filters + URL (de)serialization + session labels
+      status.ts                       status labels, tones and hints
+      routes.ts                       tiny URL helpers built from conference.url (no Ziggy)
+      board.ts                        page context (routes, query, open notes/drawers) + record lookups
+      editor.svelte.ts                editorPrompt: ask for the name once, then run the action
+      toasts.svelte.ts                toast queue
+      ui.ts                           shared input classes
     pages/
       Home.svelte
-      Schedule/Show.svelte
+      Schedule/Show.svelte            filter state, URL sync, router events, modals/drawers by id
     components/
       AppHeader.svelte
-      ui/StatusPill.svelte            (becomes a menu button in Phase 4)
-      schedule/SummaryBar.svelte
-      schedule/TimezoneNotice.svelte
-      schedule/DaySection.svelte
-      schedule/SessionBlock.svelte
-      schedule/AgendaItemRow.svelte
-      schedule/TimeRange.svelte
-      schedule/FilterBar.svelte       Phase 3
-      schedule/StatusMenu.svelte      Phase 4
-      schedule/EditorNameModal.svelte Phase 4
-      schedule/NotesModal.svelte      Phase 5
-      schedule/SessionDrawer.svelte   Phase 6
-      schedule/ItemDrawer.svelte      Phase 6
+      ui/                             Button, Select, Modal, Drawer (bits-ui Dialog), FormField,
+                                      StatusPill, Highlight, Toaster
+      schedule/                       SummaryBar, TimezoneNotice, FilterBar, DaySection,
+                                      SessionBlock, AgendaItemRow, TimeRange, RecordActions,
+                                      StatusMenu, EditorNameModal, NotesModal, SessionDrawer,
+                                      ItemDrawer, StaleNotice
 ```
 
-- **Svelte 5 runes** (`$state`, `$derived`, `$props`). Filter state will be `$state` in `Show.svelte`; the visible tree is `$derived` from the props and the filters.
-- **Headless primitives:** `bits-ui` for Dialog, Popover/DropdownMenu and Select (focus trap, keyboard, aria), styled with Tailwind.
-- **Forms:** Inertia `useForm` in drawers (gives errors and processing state).
+- **Svelte 5 runes** (`$state`, `$derived`, `$props`). Filter state is `$state` in `Show.svelte`; the visible tree is `$derived` from the props and the filters.
+- **Modals and drawers hold ids, not objects.** The record is looked up in the current props on every render, so after any save or refresh they show the latest data, and they close by themselves if the record was deleted.
+- **Headless primitives:** `bits-ui` Dialog (modals, drawers) and DropdownMenu (status menu). Selects are native `<select>` elements: on phones they open the system picker.
+- **Forms:** Inertia `useForm` in drawers and modals (errors and processing state); every request uses `preserveState` + `preserveScroll`.
 
 ### 4.6 Packages
 
@@ -434,7 +441,7 @@ resources/
 | JS | `vite` / `laravel-vite-plugin` | ^8 / ^3 | Bundler |
 | JS | `tailwindcss` / `@tailwindcss/vite` | ^4.3 | Styling |
 | JS | `typescript` / `svelte-check` | ^6 / ^4.7 | Types (svelte-check doesn't support TS 7 yet) |
-| JS | `bits-ui`, `@internationalized/date` | ^2.19 | Accessible headless primitives (Phase 3+) |
+| JS | `bits-ui`, `@internationalized/date` | ^2.19 | Accessible Dialog and DropdownMenu |
 | JS | `@lucide/svelte` | latest | The few icons we use |
 | JS | `@fontsource-variable/inter`, `@fontsource-variable/source-serif-4` | ^5.3 | Self-hosted fonts |
 | JS (dev) | `vitest` | ^5 | Unit tests |
@@ -464,8 +471,9 @@ resources/
 
 **Test strategy (no more than needed):**
 
-- **Feature tests (PHPUnit):** board loads with a valid token and returns 404 for a wrong one; the home page reveals nothing; noindex/no-referrer meta; Cairo/Prague conversion across the clock change; item ordering; notes order; one conference can't see another's rows; seeder counts, corrections and idempotency; link command and token rotation. Later: writes without an editor name rejected, status persistence with `updated_by`, validation, stale guard, notes CRUD.
-- **Unit tests (Vitest):** derived flags, summary counts, date and offset formatting. Later: filter combinations, the dependent session list, accent-insensitive search.
+- **Feature tests (PHPUnit, 41):** board loads with a valid token and returns 404 for a wrong one; the home page reveals nothing; noindex/referrer meta; Cairo/Prague conversion across the clock change; item ordering; notes order; seeder counts, corrections and idempotency; link command and token rotation; editor name cookie and validation; writes without a name rejected; status persistence with `updated_by`; notes create/delete/validation; session and item create/update/delete, validation, type rules, stale guard; one conference can't read or change another's rows.
+- **Unit tests (Vitest, 28):** derived flags, summary counts, date/offset/relative-time formatting, time shifting, accent-insensitive search and highlighting, filter combinations, URL round-trip and validation, session labels.
+- **Browser check:** a throwaway script drives headless Edge over the DevTools protocol through the main flows (status change with the name prompt, notes, stale edit, drawers, search, summary shortcut, mobile at 390 px) and fails on console errors.
 
 ---
 
@@ -520,7 +528,7 @@ Each phase ends in a working, testable state.
 - [x] `Spp2026ConferenceSeeder` with the PDF data and the fixes from section 6
 - [x] `conference:link {--rotate}` command
 - [x] Tests: seeder counts, corrections, idempotency; link + rotation
-- [ ] `forConference` query scopes (moved to Phase 4, where the first write routes need them)
+- [x] `forConference` query scopes (done in Phase 4, where the first write routes needed them)
 
 ### Phase 2: Read-only board ✅
 
@@ -530,50 +538,53 @@ Each phase ends in a working, testable state.
 - [x] Cairo + Prague time on every session, item and day
 - [x] Derived flags (at risk, IT presents, topic TBD, moderator missing)
 - [x] Responsive layout (checked at 1440 px and 390 px)
-- [x] `noindex` + `no-referrer` meta, `robots.txt`
+- [x] `noindex` + referrer meta (now `same-origin`, see the decision log), `robots.txt`
 - [x] Tests: 14 PHP feature tests, 11 Vitest unit tests
 
-### Phase 3: Filters & search ⏭ next
+### Phase 3: Filters & search ✅
 
-- [ ] `filters.ts`: Day → dependent Session, search, speaker status, assets status
-- [ ] `FilterBar` (desktop inline, mobile drawer) + URL sync via `replaceState`
-- [ ] Summary counters apply filters and reflect the current Day/Session scope; "Showing X of Y · Clear filters"; empty state
-- [ ] Search highlight; `/` shortcut
-- [ ] Vitest for `filters.ts`
+- [x] `filters.ts`: Day → dependent Session, search, speaker status, assets status, flags
+- [x] `FilterBar` (desktop inline, mobile "More filters" collapsible) + URL sync via `router.replace`
+- [x] Summary counters toggle filters and reflect the current Day/Session scope; "Showing X of Y speakers · Clear filters"; empty state
+- [x] Search highlight; `/` shortcut; `Esc` clears
+- [x] Vitest for `filters.ts` and `search.ts`
 
 **Done when:** "Day 1 → Session 2 → assets pending" works and the URL can be pasted into another browser to reproduce the view.
 
-### Phase 4: Editor identity & quick status changes
+### Phase 4: Editor identity & quick status changes ✅
 
-- [ ] `forConference` scopes, `routes.ts`, conference token in props
-- [ ] `EditorController`, `EnsureEditorName` middleware, shared `editor` prop
-- [ ] `EditorNameModal`, header "Editing as … · change", `requireEditor(action)` helper
-- [ ] `StatusMenu` + `PATCH items/{item}/status`; `updated_by` set from the cookie
-- [ ] Toast on success; "Noha · 2h ago" line on rows
-- [ ] "Loaded HH:MM · Refresh" in the header
-- [ ] Tests: write without name rejected, status persists with `updated_by`, cross-conference 404
+- [x] `forConference` scopes, `routes.ts`, conference URL in props
+- [x] `EditorController`, `EnsureEditorName` middleware, shared `editor` prop
+- [x] `EditorNameModal`, header "Editing as {name}" (click to change), `editorPrompt.require(action)`
+- [x] `StatusMenu` + `PATCH items/{item}/status`; `updated_by` set from the cookie
+- [x] Toast on success; "Noha · 2 hr. ago" line on rows and sessions
+- [x] "Loaded at HH:MM · Refresh" in the header
+- [x] Tests: write without name rejected, status persists with `updated_by`, cross-conference 404
 
 **Done when:** a first-time visitor clicks a pill, enters their name once, and the change saves and shows their name.
 
-### Phase 5: Notes
+### Phase 5: Notes ✅
 
-- [ ] `NoteController` store/destroy (items and sessions)
-- [ ] `NotesModal`: list, add, delete with confirmation; "Notes (n)" buttons
-- [ ] Tests: create, delete, validation, scoping
+- [x] `NoteController` store/destroy (items and sessions)
+- [x] `NotesModal`: list, add, delete with confirmation; "Add note" / "Notes (n)" buttons
+- [x] Tests: create, delete, validation, scoping
 
 **Done when:** anyone can read and add notes on any keynote or session from the modal.
 
-### Phase 6: Editing the schedule
+### Phase 6: Editing the schedule ✅
 
-- [ ] `SessionDrawer`: kind, number, journal, title, times (Prague, with live Cairo preview), SPP moderator, journal moderator
-- [ ] `ItemDrawer`: type-aware fields (segments hide speaker fields and status)
-- [ ] Add session (per day), add item (per session), delete with confirmation
-- [ ] Stale guard via `expected_updated_at`
-- [ ] Tests: create/update/delete, validation, stale rejection
+- [x] `SessionDrawer`: kind, number, journal, title, times (Prague, with live Cairo preview), SPP moderator, journal moderator
+- [x] `ItemDrawer`: type-aware fields (segments hide speaker fields and status)
+- [x] Add session (per day), add item (per session), delete with confirmation
+- [x] Stale guard via `expected_updated_at`
+- [x] Tests: create/update/delete, validation, type rules, stale rejection
 
 **Done when:** the team can make every kind of change the PDF drafts needed without touching code.
 
-### Phase 7: Polish & launch
+### Phase 7: Polish & launch ⏭ next (after the team's UI test)
+
+- [ ] Fixes from the UI test
+- [ ] Optional: "Copy" next to emails (planned for Phase 4, left out because a hover-only button doesn't work on phones; long-press on the link already copies)
 
 - [ ] Accessibility pass (keyboard-only run-through, contrast, focus)
 - [ ] Mobile pass on a real phone via the WhatsApp in-app browser
@@ -596,3 +607,8 @@ Each phase ends in a working, testable state.
 | 2026-10-17 | No per-session Zoom host: the 3 IT specialists rotate flexibly |
 | 2026-10-17 | Every time shown in Cairo (first) and Prague, converted per day to handle the 25 Oct clock change |
 | 2026-10-17 | Upgraded plan to current stable versions: Inertia v3, Vite 8, TypeScript 6; Inertia's lowercase `pages/` folder convention |
+| 2026-10-17 | Referrer policy `same-origin` instead of `no-referrer`: Laravel's `back()` needs the `Referer` header; other sites still never see the secret URL |
+| 2026-10-17 | Mobile filters expand inline ("More filters") instead of a bottom drawer: fewer layers, native selects already open the phone's picker |
+| 2026-10-17 | Summary counters for confirmed speakers and ready assets filter to what is still *pending*, the list the team actually works through |
+| 2026-10-17 | A search that matches a session (journal, title, moderator) shows the whole session |
+| 2026-10-17 | "+ Add" buttons hidden while filtering, so a new row never appears outside the visible scope |

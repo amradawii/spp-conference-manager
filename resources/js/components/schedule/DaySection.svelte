@@ -1,9 +1,12 @@
 <script lang="ts">
+    import { getBoard } from '@/lib/board';
     import { formatDay, formatUtcOffset } from '@/lib/format';
-    import type { Conference, Day } from '@/types/models';
+    import type { Day } from '@/types/models';
     import SessionBlock from './SessionBlock.svelte';
 
-    let { day, number, cities }: { day: Day; number: number; cities: Conference['cities'] } = $props();
+    let { day, number }: { day: Day; number: number } = $props();
+
+    const board = getBoard();
 </script>
 
 <section aria-labelledby="day-{day.id}-heading">
@@ -18,10 +21,10 @@
             {#if day.time}
                 <div class="grid grid-cols-[auto_auto_auto] items-baseline gap-x-2.5 text-sm tabular-nums">
                     <span class="font-semibold text-ink-900">{day.time.team_start}–{day.time.team_end}</span>
-                    <span class="text-xs font-medium text-ink-600">{cities.team}</span>
+                    <span class="text-xs font-medium text-ink-600">{board.cities.team}</span>
                     <span class="text-xs text-ink-400">{formatUtcOffset(day.utc_offsets.team)}</span>
                     <span class="text-ink-500">{day.time.start}–{day.time.end}</span>
-                    <span class="text-xs text-ink-500">{cities.conference}</span>
+                    <span class="text-xs text-ink-500">{board.cities.conference}</span>
                     <span class="text-xs text-ink-400">{formatUtcOffset(day.utc_offsets.conference)}</span>
                 </div>
             {/if}
@@ -30,7 +33,17 @@
 
     <div class="mt-5 space-y-5">
         {#each day.sessions as session (session.id)}
-            <SessionBlock {session} {cities} />
+            <SessionBlock {session} />
         {/each}
+
+        {#if !board.isFiltering}
+            <button
+                type="button"
+                onclick={() => board.addSession(day)}
+                class="flex w-full items-center justify-center rounded-xl border border-dashed border-line-strong py-4 text-sm font-medium text-ink-500 transition-colors hover:border-ink-300 hover:bg-white hover:text-ink-800"
+            >
+                + Add session to Day {number}
+            </button>
+        {/if}
     </div>
 </section>

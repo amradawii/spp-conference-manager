@@ -1,7 +1,8 @@
 <script lang="ts">
     import type { Tone } from '@/lib/status';
+    import ChevronDown from '@lucide/svelte/icons/chevron-down';
 
-    let { tone, label }: { tone: Tone; label: string } = $props();
+    let { tone, label, caret = false }: { tone: Tone; label: string; caret?: boolean } = $props();
 
     const styles: Record<Tone, { pill: string; dot: string }> = {
         pending: { pill: 'bg-amber-50 text-amber-800 ring-amber-600/20', dot: 'bg-amber-500' },
@@ -14,4 +15,7 @@
 <span class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs leading-none font-medium whitespace-nowrap ring-1 ring-inset {styles[tone].pill}">
     <span class="size-1.5 rounded-full {styles[tone].dot}" aria-hidden="true"></span>
     {label}
+    {#if caret}
+        <ChevronDown class="-mr-0.5 size-3 opacity-60" aria-hidden="true" />
+    {/if}
 </span>

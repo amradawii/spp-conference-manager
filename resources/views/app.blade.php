@@ -4,7 +4,7 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="robots" content="noindex, nofollow">
-        <meta name="referrer" content="no-referrer">
+        <meta name="referrer" content="same-origin">
         <link rel="icon" type="image/png" href="/favicon.png">
 
         @vite(['resources/css/app.css', 'resources/js/app.ts'])
