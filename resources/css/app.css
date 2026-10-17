@@ -1,11 +1,59 @@
+@import '@fontsource-variable/inter';
+@import '@fontsource-variable/source-serif-4';
 @import 'tailwindcss';
 
-@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';
 @source '../**/*.blade.php';
-@source '../**/*.js';
+@source '../**/*.svelte';
+@source '../**/*.ts';
 
 @theme {
-    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
-        'Segoe UI Symbol', 'Noto Color Emoji';
+    --font-sans: 'Inter Variable', ui-sans-serif, system-ui, sans-serif;
+    --font-serif: 'Source Serif 4 Variable', ui-serif, Georgia, serif;
+
+    --color-canvas: #f7f6f3;
+    --color-line: #e6e3dc;
+    --color-line-strong: #d6d2c8;
+
+    --color-ink-50: #f5f7fa;
+    --color-ink-100: #eceff5;
+    --color-ink-200: #d9dee8;
+    --color-ink-300: #b4bdd0;
+    --color-ink-400: #8592ad;
+    --color-ink-500: #5b6b8c;
+    --color-ink-600: #3f5077;
+    --color-ink-700: #2a3b5f;
+    --color-ink-800: #1d2e50;
+    --color-ink-900: #13213d;
+    --color-ink-950: #0b1426;
+
+    --color-brand-300: #6ee7c0;
+    --color-brand-400: #2fd99a;
+    --color-brand-500: #12b886;
+    --color-brand-600: #0e9f7e;
+    --color-brand-teal: #17b8b0;
+}
+
+@layer base {
+    html {
+        font-feature-settings: 'cv11', 'ss01';
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    ::selection {
+        background-color: var(--color-ink-200);
+    }
+
+    :focus-visible {
+        outline: 2px solid var(--color-ink-700);
+        outline-offset: 2px;
+    }
+}
+
+@utility label-caps {
+    font-size: 0.6875rem;
+    line-height: 1rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
 }
