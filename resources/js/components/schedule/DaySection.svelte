@@ -10,7 +10,7 @@
 </script>
 
 <section aria-labelledby="day-{day.id}-heading" class="print:not-first:break-before-page">
-    <div class="sticky top-0 z-10 -mx-4 border-b border-line bg-canvas/90 px-4 py-3 backdrop-blur-md sm:-mx-6 sm:px-6 print:static print:bg-white">
+    <div class="sticky top-0 z-10 -mx-4 border-b-2 border-line-strong bg-canvas/90 px-4 py-3 backdrop-blur-md sm:-mx-6 sm:px-6 print:static print:bg-white">
         <div class="flex flex-wrap items-end justify-between gap-x-6 gap-y-2">
             <div class="min-w-0">
                 <p class="kicker text-brand-700">Day {number} · {day.title}</p>
