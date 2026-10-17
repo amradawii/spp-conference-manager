@@ -89,3 +89,11 @@
     letter-spacing: 0.08em;
     text-transform: uppercase;
 }
+
+@utility kicker {
+    font-size: 0.8125rem;
+    line-height: 1.25rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}

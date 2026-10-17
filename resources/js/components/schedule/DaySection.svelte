@@ -13,7 +13,7 @@
     <div class="sticky top-0 z-10 -mx-4 border-b border-line bg-canvas/90 px-4 py-3 backdrop-blur-md sm:-mx-6 sm:px-6 print:static print:bg-white">
         <div class="flex flex-wrap items-end justify-between gap-x-6 gap-y-2">
             <div class="min-w-0">
-                <p class="label-caps text-brand-700">Day {number} · {day.title}</p>
+                <p class="kicker text-brand-700">Day {number} · {day.title}</p>
                 <h2 id="day-{day.id}-heading" class="mt-0.5 font-serif text-2xl font-semibold tracking-tight text-ink-900">
                     {formatDay(day.date)}
                 </h2>

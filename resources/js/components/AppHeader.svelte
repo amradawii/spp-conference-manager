@@ -5,7 +5,7 @@
 </script>
 
 <header class="bg-ink-950 text-white">
-    <div class="mx-auto max-w-6xl px-4 sm:px-6">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6">
         <div class="flex items-center justify-between gap-4 border-b border-white/10 py-4">
             <div class="flex items-center gap-4">
                 <img src="/SPP_logo.png" alt="Science Park Publisher" class="h-9 w-auto sm:h-10" />

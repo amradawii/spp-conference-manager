@@ -227,7 +227,7 @@ Times are entered in the drawer in **Prague time** (the programme's time); the C
 - **Motion:** almost none: colour transitions on hover and the progress bars. Menus, drawers and toasts appear instantly.
 - **Accessibility:** contrast ≥ 4.5:1 for text (including the muted `ink-400` and the programme colours), visible focus rings, a "Skip to schedule" link as the first Tab stop, status is never conveyed by color alone (always a label), dialogs trap focus, icon buttons have labels.
 
-Tokens live in `resources/css/app.css` (Tailwind v4 `@theme`): `ink-50…950`, `canvas`, `line`, `line-strong`, `stripe`, `brand-300…700`, `brand-teal`, `journal`, `talk`, `spp`, plus the `label-caps` utility.
+Tokens live in `resources/css/app.css` (Tailwind v4 `@theme`): `ink-50…950`, `canvas`, `line`, `line-strong`, `stripe`, `brand-300…700`, `brand-teal`, `journal`, `talk`, `spp`, plus the `label-caps` utility (small UI labels) and the larger, bold `kicker` utility (programme labels: day, "SESSION 1", "PLENARY", "KEYNOTE 1", moderator roles). Page width: `max-w-7xl` (1280 px).
 
 ---
 

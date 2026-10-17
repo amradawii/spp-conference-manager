@@ -194,7 +194,7 @@
 
 <AppHeader title={conference.name} {subtitle} actions={headerActions} />
 
-<main class="mx-auto max-w-6xl px-4 pb-24 sm:px-6 print:pb-0">
+<main class="mx-auto max-w-7xl px-4 pb-24 sm:px-6 print:pb-0">
     <div class="relative -mt-10 space-y-4">
         <SummaryBar {summary} {filters} onShortcut={applyShortcut} />
         <TimezoneNotice days={conference.days} cities={conference.cities} />

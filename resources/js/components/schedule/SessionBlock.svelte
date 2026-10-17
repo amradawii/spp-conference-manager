@@ -33,13 +33,13 @@
         </div>
 
         <div class="min-w-0">
-            <p class="label-caps {isSession ? 'text-journal' : 'text-brand-700'}">{isSession ? `Session ${session.number}` : 'Plenary'}</p>
+            <p class="kicker {isSession ? 'text-journal' : 'text-brand-700'}">{isSession ? `Session ${session.number}` : 'Plenary'}</p>
             {#if session.journal}
                 <h3 class="mt-1 font-serif text-xl leading-snug font-semibold text-journal">
                     <Highlight text={session.journal} query={board.query} />
                 </h3>
                 {#if session.title}
-                    <p class="mt-1 text-[15px] leading-snug text-ink-600"><Highlight text={session.title} query={board.query} /></p>
+                    <p class="mt-1 text-base leading-snug text-ink-600"><Highlight text={session.title} query={board.query} /></p>
                 {/if}
             {:else if session.title}
                 <h3 class="mt-1 font-serif text-xl leading-snug font-semibold text-ink-900">
@@ -51,8 +51,8 @@
                 <dl class="mt-4 flex flex-wrap gap-x-10 gap-y-3">
                     {#each moderators as moderator (moderator.label)}
                         <div>
-                            <dt class="label-caps {moderator.tone}">{moderator.label}</dt>
-                            <dd class="mt-0.5 text-sm">
+                            <dt class="kicker {moderator.tone}">{moderator.label}</dt>
+                            <dd class="mt-0.5 text-[15px]">
                                 {#if moderator.missing}
                                     <span class="inline-flex items-center gap-1.5 font-medium text-amber-700">
                                         <span class="size-1.5 rounded-full bg-amber-500" aria-hidden="true"></span>

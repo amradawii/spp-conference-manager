@@ -27,11 +27,11 @@
 
     <div class="min-w-0">
         {#if item.label}
-            <p class="label-caps {hasSpeaker(item) ? 'text-talk' : 'text-ink-500'}">{item.label}</p>
+            <p class="kicker {hasSpeaker(item) ? 'text-talk' : 'text-ink-500'}">{item.label}</p>
         {/if}
 
         {#if hasSpeaker(item)}
-            <p class="mt-0.5 text-[15px] font-semibold text-ink-900">
+            <p class="mt-0.5 text-[17px] font-semibold text-ink-900">
                 <Highlight text={item.speaker_name ?? ''} query={board.query} />
             </p>
             {#if details}
@@ -45,7 +45,7 @@
                     </span>
                 </p>
             {:else}
-                <p class="mt-2 font-serif text-[15.5px] leading-snug text-ink-800">
+                <p class="mt-2 font-serif text-[16.5px] leading-snug text-ink-800">
                     <Highlight text={item.title ?? ''} query={board.query} />
                 </p>
             {/if}
