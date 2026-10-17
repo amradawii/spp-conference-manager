@@ -1,4 +1,5 @@
 <script lang="ts">
+    import CopyButton from '@/components/ui/CopyButton.svelte';
     import Highlight from '@/components/ui/Highlight.svelte';
     import { getBoard } from '@/lib/board';
     import { formatRelative } from '@/lib/format';
@@ -15,7 +16,7 @@
     const atRisk = $derived(isAtRisk(item));
 </script>
 
-<li class="relative grid gap-3 px-5 py-4 sm:px-6 md:grid-cols-[12.5rem_minmax(0,1fr)_15rem] md:gap-6 {hasSpeaker(item) ? '' : 'bg-canvas/60'}">
+<li class="relative grid gap-3 px-5 py-4 even:bg-stripe sm:px-6 md:grid-cols-[12.5rem_minmax(0,1fr)_15rem] md:gap-6 print:break-inside-avoid print:grid-cols-[12.5rem_minmax(0,1fr)_12rem] print:gap-6">
     {#if atRisk}
         <span class="absolute inset-y-0 left-0 w-[3px] bg-rose-500" aria-hidden="true"></span>
     {/if}
@@ -26,7 +27,7 @@
 
     <div class="min-w-0">
         {#if item.label}
-            <p class="label-caps text-ink-500">{item.label}</p>
+            <p class="label-caps {hasSpeaker(item) ? 'text-talk' : 'text-ink-500'}">{item.label}</p>
         {/if}
 
         {#if hasSpeaker(item)}
@@ -39,7 +40,7 @@
 
             {#if isTopicTbd(item)}
                 <p class="mt-2">
-                    <span class="rounded-sm bg-amber-50 px-1.5 py-0.5 text-sm font-medium text-amber-800 ring-1 ring-amber-600/20 ring-inset">
+                    <span class="rounded-sm bg-yellow-100 px-1.5 py-0.5 text-sm font-semibold text-yellow-900 ring-1 ring-yellow-500/30 ring-inset">
                         Topic TBD
                     </span>
                 </p>
@@ -52,12 +53,15 @@
             {#if item.emails.length}
                 <p class="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-sm">
                     {#each item.emails as email (email)}
-                        <a
-                            href="mailto:{email}"
-                            class="break-all text-ink-500 underline decoration-ink-200 underline-offset-4 transition-colors hover:text-ink-900 hover:decoration-ink-400"
-                        >
-                            <Highlight text={email} query={board.query} />
-                        </a>
+                        <span class="inline-flex min-w-0 items-center gap-0.5">
+                            <a
+                                href="mailto:{email}"
+                                class="break-all text-ink-500 underline decoration-ink-200 underline-offset-4 transition-colors hover:text-ink-900 hover:decoration-ink-400"
+                            >
+                                <Highlight text={email} query={board.query} />
+                            </a>
+                            <CopyButton text={email} label="Copy {email}" />
+                        </span>
                     {/each}
                 </p>
             {/if}
@@ -70,7 +74,7 @@
 
     <div class="flex flex-col gap-2.5 md:pt-0.5">
         {#if hasSpeaker(item)}
-            <dl class="flex flex-wrap gap-x-5 gap-y-2 md:flex-col">
+            <dl class="flex flex-wrap gap-x-5 gap-y-2 md:flex-col print:flex-col">
                 <div class="flex items-center gap-2.5">
                     <dt class="w-14 text-xs text-ink-500">Speaker</dt>
                     <dd><StatusMenu {item} field="speaker" /></dd>
@@ -97,7 +101,7 @@
         />
 
         {#if item.updated_by}
-            <p class="text-xs text-ink-400" title={new Date(item.updated_at).toLocaleString()}>
+            <p class="text-xs text-ink-400 print:hidden" title={new Date(item.updated_at).toLocaleString()}>
                 {item.updated_by} · {formatRelative(item.updated_at)}
             </p>
         {/if}

@@ -5,7 +5,7 @@
     import { getBoard } from '@/lib/board';
     import { editorPrompt } from '@/lib/editor.svelte';
     import { inputClass } from '@/lib/ui';
-    import { useForm } from '@inertiajs/svelte';
+    import { router, useForm } from '@inertiajs/svelte';
     import { untrack } from 'svelte';
 
     const board = getBoard();
@@ -26,6 +26,18 @@
             preserveScroll: true,
             preserveState: true,
             onSuccess: () => editorPrompt.saved(),
+        });
+    }
+
+    let forgetting = $state(false);
+
+    function forget(): void {
+        router.delete(board.routes.editor, {
+            preserveScroll: true,
+            preserveState: true,
+            onStart: () => (forgetting = true),
+            onFinish: () => (forgetting = false),
+            onSuccess: () => editorPrompt.dismiss(),
         });
     }
 </script>
@@ -55,6 +67,11 @@
     </form>
 
     {#snippet footer()}
+        {#if editorPrompt.name}
+            <Button variant="danger" class="mr-auto -ml-2" disabled={forgetting} onclick={forget}>
+                {forgetting ? 'Removing…' : 'Forget my name'}
+            </Button>
+        {/if}
         <Button variant="ghost" onclick={() => editorPrompt.dismiss()}>Cancel</Button>
         <Button variant="primary" type="submit" form="editor-name-form" disabled={form.processing || form.name.trim().length < 2}>
             {form.processing ? 'Saving…' : 'Continue'}

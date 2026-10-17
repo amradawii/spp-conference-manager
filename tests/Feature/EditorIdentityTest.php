@@ -28,6 +28,19 @@ class EditorIdentityTest extends TestCase
             ->assertInertia(fn (Assert $page) => $page->where('editor.name', 'Sara Ayman'));
     }
 
+    public function test_a_device_can_forget_its_name(): void
+    {
+        $conference = Conference::factory()->create();
+        $board = route('schedule.show', $conference);
+
+        $response = $this->withCookie(Editor::COOKIE, 'Sara Ayman')
+            ->from($board)
+            ->delete(route('editor.destroy', $conference))
+            ->assertRedirect($board);
+
+        $this->assertTrue($response->getCookie(Editor::COOKIE, decrypt: false)->isCleared());
+    }
+
     public function test_a_name_is_required(): void
     {
         $conference = Conference::factory()->create();

@@ -87,7 +87,7 @@
     </Select>
 {/snippet}
 
-<section aria-label="Filters" class="rounded-xl border border-line bg-white p-3 shadow-[0_1px_2px_rgba(11,20,38,0.04)] sm:p-4">
+<section aria-label="Filters" class="rounded-xl border border-line bg-white p-3 shadow-[0_1px_2px_rgba(11,20,38,0.04)] sm:p-4 print:hidden">
     <div class="flex flex-col gap-3 lg:flex-row lg:items-center">
         <div class="flex shrink-0 rounded-lg bg-ink-50 p-1 ring-1 ring-line ring-inset" role="group" aria-label="Day">
             <button

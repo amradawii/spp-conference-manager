@@ -2,7 +2,7 @@
     let { notesCount, onNotes, onEdit }: { notesCount: number; onNotes: () => void; onEdit: () => void } = $props();
 </script>
 
-<div class="flex items-center gap-1 text-xs">
+<div class="flex items-center gap-1 text-xs print:hidden">
     <button
         type="button"
         onclick={onNotes}

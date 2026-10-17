@@ -19,7 +19,7 @@
     --color-ink-100: #eceff5;
     --color-ink-200: #d9dee8;
     --color-ink-300: #b4bdd0;
-    --color-ink-400: #8592ad;
+    --color-ink-400: #68748f;
     --color-ink-500: #5b6b8c;
     --color-ink-600: #3f5077;
     --color-ink-700: #2a3b5f;
@@ -31,7 +31,14 @@
     --color-brand-400: #2fd99a;
     --color-brand-500: #12b886;
     --color-brand-600: #0e9f7e;
+    --color-brand-700: #0b7a62;
     --color-brand-teal: #17b8b0;
+
+    /* Programme colours, toned-down versions of the official PDF's (all ≥ 4.5:1 on white). */
+    --color-journal: #1f4e8c;
+    --color-talk: #a8501f;
+    --color-spp: #b3261e;
+    --color-stripe: #f9f8f5;
 }
 
 @layer base {
@@ -56,6 +63,22 @@
     :focus-visible {
         outline: 2px solid var(--color-ink-700);
         outline-offset: 2px;
+    }
+}
+
+@media print {
+    @page {
+        margin: 12mm;
+    }
+
+    html {
+        print-color-adjust: exact;
+        -webkit-print-color-adjust: exact;
+        font-size: 11px;
+    }
+
+    body {
+        background: white;
     }
 }
 

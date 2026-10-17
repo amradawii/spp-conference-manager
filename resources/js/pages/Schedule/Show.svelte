@@ -148,8 +148,16 @@
 </svelte:head>
 
 {#snippet headerActions()}
-    <div class="flex items-center gap-3 text-xs text-ink-300 sm:gap-4">
+    <div class="flex items-center gap-3 text-xs text-ink-300 sm:gap-4 print:hidden">
         <span class="hidden md:inline">Loaded at {loadedLabel}</span>
+        <button
+            type="button"
+            onclick={() => window.print()}
+            class="hidden rounded-md px-2 py-1 font-medium text-ink-200 transition-colors hover:bg-white/10 hover:text-white md:inline-flex"
+            title="Print or save as PDF (shows the current filters)"
+        >
+            Print
+        </button>
         <button
             type="button"
             onclick={refresh}
@@ -177,9 +185,16 @@
     </div>
 {/snippet}
 
+<a
+    href="#schedule"
+    class="sr-only z-50 rounded-md bg-white px-3 py-2 text-sm font-medium text-ink-900 shadow-lg focus:not-sr-only focus:fixed focus:top-3 focus:left-3"
+>
+    Skip to schedule
+</a>
+
 <AppHeader title={conference.name} {subtitle} actions={headerActions} />
 
-<main class="mx-auto max-w-6xl px-4 pb-24 sm:px-6">
+<main class="mx-auto max-w-6xl px-4 pb-24 sm:px-6 print:pb-0">
     <div class="relative -mt-10 space-y-4">
         <SummaryBar {summary} {filters} onShortcut={applyShortcut} />
         <TimezoneNotice days={conference.days} cities={conference.cities} />
@@ -194,13 +209,12 @@
     </div>
 
     {#if visibleDays.length}
-        <div class="mt-10 space-y-14">
-            {#each visibleDays as day (day.id)}
+        <div id="schedule" tabindex="-1" class="mt-10 space-y-14 focus:outline-none">            {#each visibleDays as day (day.id)}
                 <DaySection {day} number={dayNumbers.get(day.id) ?? 0} />
             {/each}
         </div>
     {:else}
-        <div class="mt-10 rounded-xl border border-dashed border-line-strong bg-white/60 px-6 py-16 text-center">
+        <div id="schedule" class="mt-10 rounded-xl border border-dashed border-line-strong bg-white/60 px-6 py-16 text-center">
             <p class="font-serif text-xl font-semibold text-ink-900">Nothing matches these filters</p>
             <p class="mt-2 text-sm text-ink-500">Try a different spelling, or widen the day, session or status.</p>
             <Button class="mt-6" onclick={clearFilters}>Clear filters</Button>
@@ -208,7 +222,7 @@
     {/if}
 </main>
 
-<footer class="border-t border-line py-8 text-center text-xs text-ink-400">
+<footer class="border-t border-line py-8 text-center text-xs text-ink-500">
     Science Park Publisher · Internal team schedule
 </footer>
 

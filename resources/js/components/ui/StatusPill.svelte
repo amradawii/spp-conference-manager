@@ -16,6 +16,6 @@
     <span class="size-1.5 rounded-full {styles[tone].dot}" aria-hidden="true"></span>
     {label}
     {#if caret}
-        <ChevronDown class="-mr-0.5 size-3 opacity-60" aria-hidden="true" />
+        <ChevronDown class="-mr-0.5 size-3 opacity-60 print:hidden" aria-hidden="true" />
     {/if}
 </span>

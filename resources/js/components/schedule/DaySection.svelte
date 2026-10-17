@@ -9,11 +9,11 @@
     const board = getBoard();
 </script>
 
-<section aria-labelledby="day-{day.id}-heading">
-    <div class="sticky top-0 z-10 -mx-4 border-b border-line bg-canvas/90 px-4 py-3 backdrop-blur-md sm:-mx-6 sm:px-6">
+<section aria-labelledby="day-{day.id}-heading" class="print:not-first:break-before-page">
+    <div class="sticky top-0 z-10 -mx-4 border-b border-line bg-canvas/90 px-4 py-3 backdrop-blur-md sm:-mx-6 sm:px-6 print:static print:bg-white">
         <div class="flex flex-wrap items-end justify-between gap-x-6 gap-y-2">
             <div class="min-w-0">
-                <p class="label-caps text-ink-500">Day {number} · {day.title}</p>
+                <p class="label-caps text-brand-700">Day {number} · {day.title}</p>
                 <h2 id="day-{day.id}-heading" class="mt-0.5 font-serif text-2xl font-semibold tracking-tight text-ink-900">
                     {formatDay(day.date)}
                 </h2>
@@ -40,7 +40,7 @@
             <button
                 type="button"
                 onclick={() => board.addSession(day)}
-                class="flex w-full items-center justify-center rounded-xl border border-dashed border-line-strong py-4 text-sm font-medium text-ink-500 transition-colors hover:border-ink-300 hover:bg-white hover:text-ink-800"
+                class="flex w-full items-center justify-center rounded-xl border border-dashed print:hidden border-line-strong py-4 text-sm font-medium text-ink-500 transition-colors hover:border-ink-300 hover:bg-white hover:text-ink-800"
             >
                 + Add session to Day {number}
             </button>

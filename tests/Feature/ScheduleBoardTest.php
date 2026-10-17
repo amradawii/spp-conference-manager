@@ -59,6 +59,18 @@ class ScheduleBoardTest extends TestCase
             ->assertSee('<meta name="referrer" content="same-origin">', false);
     }
 
+    public function test_board_is_not_framed_cached_or_indexed(): void
+    {
+        $conference = Conference::factory()->create();
+
+        $this->get(route('schedule.show', $conference))
+            ->assertHeader('X-Frame-Options', 'DENY')
+            ->assertHeader('X-Content-Type-Options', 'nosniff')
+            ->assertHeader('Referrer-Policy', 'same-origin')
+            ->assertHeader('X-Robots-Tag', 'noindex, nofollow')
+            ->assertHeader('Cache-Control', 'no-store, private');
+    }
+
     public function test_times_are_shown_in_conference_and_team_timezones_across_the_clock_change(): void
     {
         $conference = Conference::factory()->create();

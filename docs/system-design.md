@@ -74,7 +74,7 @@ admin panel (conferences are created with a seeder/artisan) · per-session Zoom 
 1. **One page.** The whole conference is a single scrollable agenda, so there are no pages to navigate between.
 2. **Status sits next to the record**, as on the PDF screenshot: each speaker row has a status column on the right.
 3. **One click to change a status.** Click the pill, pick the new value, done. No forms for the common action.
-4. **Problems stand out.** Neutral by default. Color appears only where action is needed (pending, at risk, missing moderator, topic TBD).
+4. **Problems stand out.** Status colour (amber, rose, emerald) appears only where action is needed (pending, at risk, missing moderator, topic TBD). A few quiet programme colours, as in the PDF, only help the eye find sessions, speakers and moderators.
 5. **Never lose an action.** If the editor name is missing, the name modal opens first and the original action then continues automatically.
 6. **No time-zone math for the team.** Cairo time is always shown first, with Prague below it.
 
@@ -193,7 +193,9 @@ Derived flags, computed on the client with no database column (`resources/js/lib
 | Edit item / session | "Edit" opens a right-side drawer with a form. Moderators are edited here. Empty moderator fields show "Assign" as a link into the drawer. |
 | Add | "+ Add item to this session" at the end of each session; "+ Add session to Day N" at the end of each day. Hidden while filtering, so new rows never land in a filtered-out place. |
 | Delete | In the drawer footer, with an inline confirmation naming the record ("Delete Prof. Veera Rajendran and its notes?", "Delete this session and its 7 items?"). |
-| Editor name | First write action without a name → modal "Who is making changes?". Saved → the original action runs. If the cookie is lost later, the server's `editor_name` error re-opens the modal and retries. |
+| Editor name | First write action without a name → modal "Who is making changes?". Saved → the original action runs. If the cookie is lost later, the server's `editor_name` error re-opens the modal and retries. Clicking the name in the header opens "Change your name", which also has **Forget my name** (removes the cookie, e.g. on a shared or test device). |
+| Copy email | A small copy icon after every email copies it; the icon turns into a check and a toast confirms ("Copied nader83@vt.edu"). Always visible, so it works on phones. |
+| Print | "Print" in the header (desktop) prints the current view. Filters, buttons, notes links and toasts are hidden; each day starts on a new page; colours are kept. "Save as PDF" in the print dialog gives a clean programme PDF. |
 | Stale edit guard | If someone changed the record after you loaded the page, saving shows an amber notice: "Noha changed this at 11:07 (Cairo time) after you opened it. Close to see their version, or save again to replace it with yours." The button becomes "Save anyway". |
 | Errors | Toasts for a deleted record (404, then the board refreshes), an expired page (419), rate limit (429), server errors and lost connection. |
 | Keyboard | `/` focuses search · `Esc` clears the search, closes modal/drawer/menu. |
@@ -216,14 +218,16 @@ Times are entered in the drawer in **Prague time** (the programme's time); the C
 
 - **Header:** deep navy band (`ink-950`) carrying the SPP logo, whose wordmark is white. A thin teal→green gradient line taken from the logo closes the band.
 - **Typography:** *Source Serif 4* for conference, day, session titles and talk topics (academic, publisher feel). *Inter* for everything else. `tabular-nums` for times. Fonts are self-hosted via Fontsource (no Google Fonts requests).
-- **Color:** warm off-white page (`canvas`), white surfaces, hairline warm borders (`line`), ink-navy text. The brand teal/green appears only as accents (header line, kicker label, progress bars, focus). Status colors appear only in soft tinted pills with a small dot.
+- **Color:** warm off-white page (`canvas`), white surfaces, hairline warm borders (`line`), ink-navy text. The brand teal/green appears only as accents (header line, day and plenary labels, progress bars, focus). Status colors appear only in soft tinted pills with a small dot.
+- **Programme colours** (taken from the PDF, darkened for contrast, at most one per line): `journal` navy blue for session numbers, journal names and the journal moderator label, with a faint blue tint behind session headers; `talk` burnt orange for talk labels ("KEYNOTE 1"); `spp` deep red for the SPP moderator label. Topic TBD keeps the PDF's yellow highlight.
+- **Rows:** item rows alternate white / `stripe` (very light warm gray) so the eye can follow a row from time to status.
 - **Shape and depth:** `rounded-xl` cards, a single soft shadow on the summary card, almost none elsewhere.
 - **Labels:** small caps, letter-spaced labels ("KEYNOTE 1", "SPP MODERATOR") instead of icons.
-- **Icons:** 4 in total (search, chevron, close, filters), from `@lucide/svelte`. Actions use words ("Edit", "Notes", "Refresh"), not icon buttons.
+- **Icons:** 6 in total (search, chevron, close, filters, copy, check), from `@lucide/svelte`. Actions use words ("Edit", "Notes", "Refresh"), not icon buttons; copy is the one exception because it sits inline after each email.
 - **Motion:** almost none: colour transitions on hover and the progress bars. Menus, drawers and toasts appear instantly.
-- **Accessibility:** contrast ≥ 4.5:1, visible focus rings, status is never conveyed by color alone (always a label), dialogs trap focus.
+- **Accessibility:** contrast ≥ 4.5:1 for text (including the muted `ink-400` and the programme colours), visible focus rings, a "Skip to schedule" link as the first Tab stop, status is never conveyed by color alone (always a label), dialogs trap focus, icon buttons have labels.
 
-Tokens live in `resources/css/app.css` (Tailwind v4 `@theme`): `ink-50…950`, `canvas`, `line`, `line-strong`, `brand-300…600`, `brand-teal`, plus the `label-caps` utility.
+Tokens live in `resources/css/app.css` (Tailwind v4 `@theme`): `ink-50…950`, `canvas`, `line`, `line-strong`, `stripe`, `brand-300…700`, `brand-teal`, `journal`, `talk`, `spp`, plus the `label-caps` utility.
 
 ---
 
@@ -309,10 +313,10 @@ erDiagram
 
 Notes on the model:
 
-- **The table is `conference_sessions`, not `sessions`.** Laravel's database session driver already uses `sessions`, and `Session` would clash with the facade. Model: `ConferenceSession`.
-- **Statuses are `string` columns cast to PHP backed enums**, not MySQL `ENUM` columns, so adding a value later doesn't need an `ALTER`.
+- **The table is** `conference_sessions`**, not** `sessions`**.** Laravel's database session driver already uses `sessions`, and `Session` would clash with the facade. Model: `ConferenceSession`.
+- **Statuses are** `string` **columns cast to PHP backed enums**, not MySQL `ENUM` columns, so adding a value later doesn't need an `ALTER`.
 - **Ordering:** days by `date`; sessions by `starts_at`; items by `starts_at` (nulls last), then `position`. Session 4 orals have no individual times, so `position` keeps them in order. New items get `max(position) + 1`.
-- **Speakers are stored on the item, not in a `people` table.** The same keynote doesn't appear twice, so a separate table would only add joins.
+- **Speakers are stored on the item, not in a** `people` **table.** The same keynote doesn't appear twice, so a separate table would only add joins.
 - **Attribution:** `updated_by` on sessions and items plus `author_name` on notes, combined with `updated_at`, is enough for "Noha · 2h ago". There is no history table (activity log is out of scope).
 - **Day number** ("Day 1") is derived from date order on the client and not stored.
 - **Time conversion** lives in `Day::timeRange()` / `Day::utcOffsets()` (Carbon, using the conference and team timezones).
@@ -364,6 +368,7 @@ middleware and `throttle:60,1`; saving the name uses `throttle:20,1`.
 | GET | `/` | `Route::inertia('Home')` | Plain page: "This schedule is private" | ✅ 2 |
 | GET | `/s/{conference:access_token}` | `ScheduleController@show` | The board | ✅ 2 |
 | POST | `/s/{token}/editor` | `EditorController@store` | Save editor name (cookie) | ✅ 4 |
+| DELETE | `/s/{token}/editor` | `EditorController@destroy` | Forget the name on this device | ✅ 7 |
 | PATCH | `/s/{token}/items/{item}/status` | `AgendaItemStatusController@update` | Quick status change | ✅ 4 |
 | POST | `/s/{token}/notes` | `NoteController@store` | Add note (`notable_type`, `notable_id`) | ✅ 5 |
 | DELETE | `/s/{token}/notes/{note}` | `NoteController@destroy` | Delete note | ✅ 5 |
@@ -380,15 +385,16 @@ one conference can never reach another conference's rows. A test covers this.
 
 ### 4.4 Backend building blocks
 
-- **Middleware `EnsureEditorName`** (alias `editor`): reads the `editor_name` cookie via `App\Support\Editor`. If it is missing, it redirects back with an `editor_name` error, and the frontend opens the name modal and retries. The frontend normally asks first; this is the safety net.
-- **`EditorController@store`**: validates `name` (required, 2–60 chars) and sets `Cookie::forever('editor_name', …)`. Laravel cookies are encrypted.
+- **Middleware** `EnsureEditorName` (alias `editor`): reads the `editor_name` cookie via `App\Support\Editor`. If it is missing, it redirects back with an `editor_name` error, and the frontend opens the name modal and retries. The frontend normally asks first; this is the safety net.
+- `EditorController@store`: validates `name` (required, 2–60 chars) and sets `Cookie::forever('editor_name', …)`. Laravel cookies are encrypted.
 - **Form Requests:** `SaveConferenceSessionRequest` and `SaveAgendaItemRequest` (one each for create and update; the HTTP method decides what is required), `UpdateAgendaItemStatusRequest` (`speaker_status`/`assets_status`, at least one, `Rule::enum`; assets only Pending/Ready), `StoreNoteRequest`.
 - **Stale guard** (`GuardsAgainstStaleEdits`): updates require `expected_updated_at`. If the record's `updated_at` differs, an `after()` hook fails validation with a `stale` error naming who changed it and when (in the team's city). The drawer sends the timestamp from the current props, so after that error (which reloads the props) a second save intentionally wins. Status changes skip this guard (single-value, intentional clicks; last write wins).
 - **Model hooks:** deleting a session deletes its items' notes and its own notes (polymorphic rows aren't covered by foreign-key cascades); deleting an item deletes its notes.
 - **Item type rules:** segments never carry speaker fields and their assets are "Not needed"; turning a segment into a speaker item starts assets at Pending; editing details never changes statuses.
-- **`HandleInertiaRequests` shared props:** `editor: { name }`. Toasts use Inertia v3 flash data (`Inertia::flash('toast', …)`).
+- `HandleInertiaRequests` **shared props:** `editor: { name }`. Toasts use Inertia v3 flash data (`Inertia::flash('toast', …)`).
 - **Artisan:** `php artisan conference:link {conference?} {--rotate}` prints the team URL and, with `--rotate`, generates a new token (use it if the link leaks). ✅
 - **Privacy:** `<meta name="robots" content="noindex, nofollow">`, `<meta name="referrer" content="same-origin">`, and `Disallow: /` in `robots.txt`. `same-origin` still hides the secret URL from other sites, but keeps the `Referer` header on our own requests, which Laravel's `back()` redirects need. ✅
+- **Security headers** (`AddSecurityHeaders`, on every web response): `X-Frame-Options: DENY`, `X-Content-Type-Options: nosniff`, `Referrer-Policy: same-origin`, `X-Robots-Tag: noindex, nofollow`. The board also gets `Cache-Control: private, no-store`, so shared proxies and the browser's back-forward cache never keep a copy of the private schedule. ✅
 
 ### 4.5 Frontend structure (as built)
 
@@ -411,6 +417,7 @@ resources/
       board.ts                        page context (routes, query, open notes/drawers) + record lookups
       editor.svelte.ts                editorPrompt: ask for the name once, then run the action
       toasts.svelte.ts                toast queue
+      clipboard.ts                    copy text (Clipboard API, with a fallback for plain-http hosts)
       ui.ts                           shared input classes
     pages/
       Home.svelte
@@ -418,7 +425,7 @@ resources/
     components/
       AppHeader.svelte
       ui/                             Button, Select, Modal, Drawer (bits-ui Dialog), FormField,
-                                      StatusPill, Highlight, Toaster
+                                      StatusPill, Highlight, Toaster, CopyButton
       schedule/                       SummaryBar, TimezoneNotice, FilterBar, DaySection,
                                       SessionBlock, AgendaItemRow, TimeRange, RecordActions,
                                       StatusMenu, EditorNameModal, NotesModal, SessionDrawer,
@@ -471,9 +478,58 @@ resources/
 
 **Test strategy (no more than needed):**
 
-- **Feature tests (PHPUnit, 41):** board loads with a valid token and returns 404 for a wrong one; the home page reveals nothing; noindex/referrer meta; Cairo/Prague conversion across the clock change; item ordering; notes order; seeder counts, corrections and idempotency; link command and token rotation; editor name cookie and validation; writes without a name rejected; status persistence with `updated_by`; notes create/delete/validation; session and item create/update/delete, validation, type rules, stale guard; one conference can't read or change another's rows.
-- **Unit tests (Vitest, 28):** derived flags, summary counts, date/offset/relative-time formatting, time shifting, accent-insensitive search and highlighting, filter combinations, URL round-trip and validation, session labels.
-- **Browser check:** a throwaway script drives headless Edge over the DevTools protocol through the main flows (status change with the name prompt, notes, stale edit, drawers, search, summary shortcut, mobile at 390 px) and fails on console errors.
+- **Feature tests (PHPUnit, 43):** board loads with a valid token and returns 404 for a wrong one; the home page reveals nothing; noindex/referrer meta and security headers; Cairo/Prague conversion across the clock change; item ordering; notes order; seeder counts, corrections and idempotency; link command and token rotation; editor name cookie, validation and forgetting it; writes without a name rejected; status persistence with `updated_by`; notes create/delete/validation; session and item create/update/delete, validation, type rules, stale guard; one conference can't read or change another's rows.
+- **Unit tests (Vitest, 29):** derived flags, summary counts, date/offset/relative-time formatting, time shifting, accent-insensitive search and highlighting, filter combinations, URL round-trip and validation, session labels.
+- **Browser check:** a throwaway script drives headless Edge over the DevTools protocol through the main flows (status change with the name prompt, notes, stale edit, drawers, search, summary shortcut, copy email, forget name, print media, mobile at 390 px) and fails on console errors.
+
+### 5.1 Resetting a device (testing the first-time name prompt)
+
+The name lives in an encrypted cookie in the browser, so `migrate:fresh` doesn't remove it and no server command can clear a single browser. Use one of:
+
+1. **Forget my name:** click your name in the header → "Forget my name". The next change asks for the name again.
+2. A **private / incognito window** always starts without a name.
+3. Clear the site's cookies in the browser (site settings for `127.0.0.1`).
+
+`php artisan key:generate` also works, but it makes *every* encrypted cookie unreadable: all devices lose their name and their session. Fine locally; never run it on production after launch.
+
+### 5.2 Deployment
+
+Runtime needs only **PHP 8.2+ and MySQL 8 / MariaDB 10.11+**: no Node, no queue worker, no cron, no websockets.
+
+**Production `.env`** (start from `.env.example`):
+
+```dotenv
+APP_ENV=production
+APP_DEBUG=false
+APP_URL=https://schedule.example.com   # HTTPS: needed for the secure cookies and the copy button's Clipboard API
+LOG_LEVEL=warning
+DB_DATABASE=…
+DB_USERNAME=…
+DB_PASSWORD=…
+SESSION_SECURE_COOKIE=true            # session and editor-name cookies only over HTTPS
+```
+
+**Shared hosting (cPanel or similar)**
+
+1. On your machine: `composer install --no-dev --optimize-autoloader` and `npm ci && npm run build` (shared hosts usually have no Node; the result is `public/build`).
+2. Upload the project **outside** `public_html` (e.g. `~/spp-manager`), including `vendor/` and `public/build/`, but not `node_modules/`, `.env` or `tests/`.
+3. Point the (sub)domain's **document root to `~/spp-manager/public`**. If the host doesn't allow that, replace `public_html` with a symlink to it (`ln -s ~/spp-manager/public ~/public_html`). Never expose the project root: it contains `.env`.
+4. Create the database and user in the hosting panel; write `.env`.
+5. Over SSH (or the host's terminal), in the project folder:
+
+   ```bash
+   php artisan key:generate      # once, on the first deploy only
+   php artisan migrate --force
+   php artisan db:seed --force   # seeds the PDF programme; safe to re-run, it skips an existing conference
+   php artisan optimize          # caches config, routes, views
+   php artisan conference:link   # prints the team link to share
+   ```
+
+6. Make `storage/` and `bootstrap/cache/` writable by PHP. Enable the host's free SSL (AutoSSL / Let's Encrypt).
+
+**VPS (Nginx + PHP-FPM):** same steps, with the Nginx `root` set to `/var/www/spp-manager/public`, the standard Laravel `try_files $uri $uri/ /index.php?$query_string;` block, and HTTPS from Certbot. Node can be installed to build on the server, but building locally works the same.
+
+**Updating after launch:** upload the changed files and the new `public/build`, then `php artisan migrate --force && php artisan optimize`. **Never** run `migrate:fresh` or `key:generate` on production: the first wipes every status and note (and changes the link), the second signs everyone out and forgets all names. Use the host's daily database backup, or a `mysqldump` before each update.
 
 ---
 
@@ -581,16 +637,18 @@ Each phase ends in a working, testable state.
 
 **Done when:** the team can make every kind of change the PDF drafts needed without touching code.
 
-### Phase 7: Polish & launch ⏭ next (after the team's UI test)
+### Phase 7: Polish & launch ✅ (built; launch steps are done by the team)
 
-- [ ] Fixes from the UI test
-- [ ] Optional: "Copy" next to emails (planned for Phase 4, left out because a hover-only button doesn't work on phones; long-press on the link already copies)
-
-- [ ] Accessibility pass (keyboard-only run-through, contrast, focus)
-- [ ] Mobile pass on a real phone via the WhatsApp in-app browser
-- [ ] Print stylesheet (`print:` variants) so a clean PDF can still be produced from the browser
-- [ ] Deploy (shared hosting or VPS): `npm run build` locally or in CI and upload `public/build` (shared hosts usually have no Node); `composer install --no-dev`; `APP_DEBUG=false`, HTTPS `APP_URL`; `php artisan migrate --force`, `db:seed`, `optimize`
-- [ ] Generate the link with `conference:link` and share it in the team group
+- [x] Fixes from the UI test: pointer cursor, notes name field, 12-hour times, time-zones box border
+- [x] Programme colours from the PDF, alternating row backgrounds
+- [x] Copy icon after every email (always visible, so it works on phones)
+- [x] "Forget my name" on the device (`DELETE editor`)
+- [x] Accessibility pass: skip link, contrast of muted text, labelled icon buttons, focus rings
+- [x] Security headers; board responses not cached
+- [x] Print stylesheet (`print:` variants) + "Print" button: a clean PDF can still be produced from the browser
+- [x] Deployment guide (section 5.2)
+- [ ] Mobile pass on a real phone via the WhatsApp in-app browser (team)
+- [ ] Deploy, run `conference:link` and share the link in the team group (team)
 
 **Done when:** the team uses the link instead of PDF drafts.
 
@@ -616,3 +674,9 @@ Each phase ends in a working, testable state.
 | 2026-10-17 | UI test feedback: the notes modal asks for the name in its own required field (first time only) instead of opening the name modal on top of it, which froze the page. Status menu and drawers keep the name modal |
 | 2026-10-17 | The status menu doesn't lock page scroll (`preventScroll={false}`): bits-ui's body lock could outlive a quickly closed menu and leave every button unclickable |
 | 2026-10-17 | Buttons, menu items, selects and radio cards get `cursor: pointer` (Tailwind v4 dropped it) |
+| 2026-10-17 | Three programme colours from the PDF (journal blue, talk orange, SPP red), darkened to pass contrast and used only on labels, journal names and a faint session-header tint. Status colours stay reserved for things that need action |
+| 2026-10-17 | Item rows alternate white / light warm gray (`stripe`) |
+| 2026-10-17 | Copy icon after each email, always visible (the earlier concern was a hover-only button, which phones can't use). Falls back to `execCommand('copy')` when the Clipboard API is unavailable (plain http) |
+| 2026-10-17 | "Forget my name" instead of a server command: a server can't clear one browser's cookie; `key:generate` resets every device |
+| 2026-10-17 | Security headers middleware; the board is `Cache-Control: private, no-store` so the private schedule is never stored by proxies or the back-forward cache |
+| 2026-10-17 | Printing keeps colours (`print-color-adjust: exact`), hides all controls and starts each day on a new page |

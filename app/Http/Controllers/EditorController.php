@@ -25,4 +25,12 @@ class EditorController extends Controller
 
         return back();
     }
+
+    public function destroy(Conference $conference): RedirectResponse
+    {
+        Cookie::queue(Cookie::forget(Editor::COOKIE));
+        Inertia::flash('toast', 'Your name was removed from this device.');
+
+        return back();
+    }
 }

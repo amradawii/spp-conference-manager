@@ -14,6 +14,7 @@ Route::prefix('s/{conference:access_token}')->scopeBindings()->group(function ()
     Route::get('/', [ScheduleController::class, 'show'])->name('schedule.show');
 
     Route::post('editor', [EditorController::class, 'store'])->middleware('throttle:20,1')->name('editor.store');
+    Route::delete('editor', [EditorController::class, 'destroy'])->middleware('throttle:20,1')->name('editor.destroy');
 
     Route::middleware(['editor', 'throttle:60,1'])->group(function () {
         Route::patch('items/{item}/status', [AgendaItemStatusController::class, 'update'])->name('items.status');
