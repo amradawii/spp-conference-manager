@@ -23,7 +23,7 @@
     id="session-{session.id}"
     class="overflow-hidden rounded-xl border border-line bg-white shadow-[0_1px_2px_rgba(11,20,38,0.04)]"
 >
-    <header class="grid gap-3 px-5 py-5 sm:px-6 md:grid-cols-[9.5rem_minmax(0,1fr)_15rem] md:gap-6 {isSession ? '' : 'bg-ink-50/60'}">
+    <header class="grid gap-3 px-5 py-5 sm:px-6 md:grid-cols-[12.5rem_minmax(0,1fr)_15rem] md:gap-6 {isSession ? '' : 'bg-ink-50/60'}">
         <div class="md:pt-0.5">
             <TimeRange time={session.time} cities={board.cities} />
         </div>

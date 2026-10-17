@@ -21,7 +21,7 @@ export function formatShortDay(date: string): string {
 }
 
 const relativeFormatter = new Intl.RelativeTimeFormat('en', { numeric: 'auto', style: 'short' });
-const clockFormatter = new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+const clockFormatter = new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit', hour12: true });
 
 /** "just now", "5 min ago", "3 hr ago", "yesterday", or "17 Oct, 10:42" for anything older. */
 export function formatRelative(iso: string, now: Date = new Date()): string {
@@ -34,6 +34,21 @@ export function formatRelative(iso: string, now: Date = new Date()): string {
     if (abs < 172800) return relativeFormatter.format(Math.round(seconds / 86400), 'day');
 
     return clockFormatter.format(new Date(iso));
+}
+
+/** "16:30" → "04:30 PM". Times travel as 24-hour "HH:MM"; only the display uses AM/PM. */
+export function formatClock(time: string): string {
+    const match = /^(\d{1,2}):(\d{2})/.exec(time);
+    if (!match) return time;
+
+    const hours = Number(match[1]);
+    const hours12 = hours % 12 === 0 ? 12 : hours % 12;
+    return `${String(hours12).padStart(2, '0')}:${match[2]} ${hours < 12 ? 'AM' : 'PM'}`;
+}
+
+/** "10:00", "16:30" → "10:00 AM – 04:30 PM" */
+export function formatClockRange(start: string, end: string): string {
+    return `${formatClock(start)} – ${formatClock(end)}`;
 }
 
 /** "09:30" shifted by 2 hours → "11:30" (wraps around midnight). */

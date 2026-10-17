@@ -39,7 +39,7 @@
     const dayNumbers = $derived(new Map(conference.days.map((day, index) => [day.id, index + 1])));
     const nextSessionNumber = $derived(Math.max(0, ...conference.days.flatMap((day) => day.sessions.map((s) => s.number ?? 0))) + 1);
     const subtitle = $derived(`${formatDateSpan(conference.days.map((day) => day.date))} · Online via Zoom`);
-    const loadedLabel = $derived(loadedAt.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }));
+    const loadedLabel = $derived(loadedAt.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true }));
 
     const notesRecord = $derived.by(() => {
         if (!notesTarget) return null;

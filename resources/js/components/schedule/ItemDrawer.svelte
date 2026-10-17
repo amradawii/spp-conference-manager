@@ -6,7 +6,7 @@
     import { getBoard } from '@/lib/board';
     import { editorPrompt } from '@/lib/editor.svelte';
     import { sessionLabel } from '@/lib/filters';
-    import { shiftTime, teamLeadHours } from '@/lib/format';
+    import { formatClockRange, shiftTime, teamLeadHours } from '@/lib/format';
     import { inputClass } from '@/lib/ui';
     import type { AgendaItem, AgendaItemType, ConferenceSession, Day } from '@/types/models';
     import { router, useForm } from '@inertiajs/svelte';
@@ -55,7 +55,7 @@
     const isSegment = $derived(form.type === 'segment');
     const lead = $derived(teamLeadHours(day));
     const teamPreview = $derived(
-        form.starts_at && form.ends_at ? `${shiftTime(form.starts_at, lead)}–${shiftTime(form.ends_at, lead)}` : null,
+        form.starts_at && form.ends_at ? formatClockRange(shiftTime(form.starts_at, lead), shiftTime(form.ends_at, lead)) : null,
     );
 
     function changeType(type: AgendaItemType): void {

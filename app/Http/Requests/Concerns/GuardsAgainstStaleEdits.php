@@ -25,7 +25,7 @@ trait GuardsAgainstStaleEdits
             }
 
             $who = $record->updated_by ?? 'Someone';
-            $when = $record->updated_at?->setTimezone($conference->team_timezone)->format('H:i');
+            $when = $record->updated_at?->setTimezone($conference->team_timezone)->format('h:i A');
             $city = Conference::cityOf($conference->team_timezone);
 
             $validator->errors()->add(

@@ -8,7 +8,7 @@
     const clocksChange = $derived(new Set(leads.map((lead) => lead.hours)).size > 1);
 </script>
 
-<aside class="rounded-lg border border-line border-l-2 border-l-brand-500 bg-white px-5 py-4">
+<aside class="rounded-lg border border-line bg-white px-5 py-4">
     <p class="label-caps text-ink-500">Time zones</p>
     <p class="mt-1.5 text-sm leading-relaxed text-ink-700">
         Every time is shown twice: <span class="font-semibold text-ink-900">{cities.team}</span> first, then

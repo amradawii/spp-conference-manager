@@ -40,6 +40,15 @@
         -webkit-tap-highlight-color: transparent;
     }
 
+    /* Tailwind v4 no longer gives buttons a pointer cursor. */
+    button:not(:disabled),
+    [role='button']:not([aria-disabled='true']),
+    [role='menuitem'],
+    select:not(:disabled),
+    label:has(> input[type='radio']) {
+        cursor: pointer;
+    }
+
     ::selection {
         background-color: var(--color-ink-200);
     }

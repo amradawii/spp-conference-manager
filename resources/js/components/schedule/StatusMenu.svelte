@@ -22,7 +22,7 @@
     const fieldLabel = $derived(field === 'speaker' ? 'Speaker' : 'Assets');
 
     function save(value: string): void {
-        if (value === current) return;
+        if (value === current || saving) return;
 
         const submit = () =>
             router.patch(
@@ -45,14 +45,16 @@
     <DropdownMenu.Trigger
         class="rounded-full transition-opacity hover:opacity-80 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink-700 {saving ? 'opacity-50' : ''}"
         aria-label="{fieldLabel} status: {currentOption.label}. Change"
-        disabled={saving}
+        aria-busy={saving}
     >
         <StatusPill tone={currentOption.tone} label={saving ? 'Saving…' : currentOption.label} caret />
     </DropdownMenu.Trigger>
     <DropdownMenu.Portal>
+        <!-- No body lock: bits-ui's lock can outlive a quickly closed menu and leave the whole page unclickable. -->
         <DropdownMenu.Content
             align="start"
             sideOffset={6}
+            preventScroll={false}
             class="z-50 w-72 rounded-lg border border-line bg-white p-1 shadow-xl ring-1 ring-ink-950/5 focus:outline-none"
         >
             <p class="label-caps px-3 pt-2 pb-1 text-ink-400">{fieldLabel} status</p>

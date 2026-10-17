@@ -1,6 +1,6 @@
 import type { Day } from '@/types/models';
 import { describe, expect, it } from 'vitest';
-import { formatDateSpan, formatDay, formatRelative, formatUtcOffset, pluralize, shiftTime, teamLeadHours } from './format';
+import { formatClock, formatClockRange, formatDateSpan, formatDay, formatRelative, formatUtcOffset, pluralize, shiftTime, teamLeadHours } from './format';
 
 function dayWithOffsets(conference: string, team: string): Day {
     return { id: 1, date: '2026-10-24', title: '', time: null, utc_offsets: { conference, team }, sessions: [] };
@@ -31,6 +31,14 @@ describe('format', () => {
     it('pluralizes', () => {
         expect(pluralize(1, 'note')).toBe('1 note');
         expect(pluralize(3, 'note')).toBe('3 notes');
+    });
+
+    it('shows times on a 12-hour clock', () => {
+        expect(formatClock('00:15')).toBe('12:15 AM');
+        expect(formatClock('09:05')).toBe('09:05 AM');
+        expect(formatClock('12:00')).toBe('12:00 PM');
+        expect(formatClock('16:30')).toBe('04:30 PM');
+        expect(formatClockRange('10:00', '16:30')).toBe('10:00 AM – 04:30 PM');
     });
 
     it('shifts programme times into the team timezone', () => {

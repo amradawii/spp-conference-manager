@@ -1,6 +1,6 @@
 <script lang="ts">
     import { getBoard } from '@/lib/board';
-    import { formatDay, formatUtcOffset } from '@/lib/format';
+    import { formatClockRange, formatDay, formatUtcOffset } from '@/lib/format';
     import type { Day } from '@/types/models';
     import SessionBlock from './SessionBlock.svelte';
 
@@ -20,10 +20,10 @@
             </div>
             {#if day.time}
                 <div class="grid grid-cols-[auto_auto_auto] items-baseline gap-x-2.5 text-sm tabular-nums">
-                    <span class="font-semibold text-ink-900">{day.time.team_start}–{day.time.team_end}</span>
+                    <span class="font-semibold text-ink-900">{formatClockRange(day.time.team_start, day.time.team_end)}</span>
                     <span class="text-xs font-medium text-ink-600">{board.cities.team}</span>
                     <span class="text-xs text-ink-400">{formatUtcOffset(day.utc_offsets.team)}</span>
-                    <span class="text-ink-500">{day.time.start}–{day.time.end}</span>
+                    <span class="text-ink-500">{formatClockRange(day.time.start, day.time.end)}</span>
                     <span class="text-xs text-ink-500">{board.cities.conference}</span>
                     <span class="text-xs text-ink-400">{formatUtcOffset(day.utc_offsets.conference)}</span>
                 </div>

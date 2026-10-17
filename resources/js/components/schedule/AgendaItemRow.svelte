@@ -15,7 +15,7 @@
     const atRisk = $derived(isAtRisk(item));
 </script>
 
-<li class="relative grid gap-3 px-5 py-4 sm:px-6 md:grid-cols-[9.5rem_minmax(0,1fr)_15rem] md:gap-6 {hasSpeaker(item) ? '' : 'bg-canvas/60'}">
+<li class="relative grid gap-3 px-5 py-4 sm:px-6 md:grid-cols-[12.5rem_minmax(0,1fr)_15rem] md:gap-6 {hasSpeaker(item) ? '' : 'bg-canvas/60'}">
     {#if atRisk}
         <span class="absolute inset-y-0 left-0 w-[3px] bg-rose-500" aria-hidden="true"></span>
     {/if}

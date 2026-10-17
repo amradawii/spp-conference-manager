@@ -4,7 +4,7 @@
     import FormField from '@/components/ui/FormField.svelte';
     import { getBoard } from '@/lib/board';
     import { editorPrompt } from '@/lib/editor.svelte';
-    import { formatDay, shiftTime, teamLeadHours } from '@/lib/format';
+    import { formatClockRange, formatDay, shiftTime, teamLeadHours } from '@/lib/format';
     import { inputClass } from '@/lib/ui';
     import type { ConferenceSession, Day, SessionKind } from '@/types/models';
     import { router, useForm } from '@inertiajs/svelte';
@@ -39,7 +39,7 @@
     const errors = $derived(form.errors as Record<string, string | undefined>);
     const lead = $derived(teamLeadHours(day));
     const teamPreview = $derived(
-        form.starts_at && form.ends_at ? `${shiftTime(form.starts_at, lead)}–${shiftTime(form.ends_at, lead)}` : null,
+        form.starts_at && form.ends_at ? formatClockRange(shiftTime(form.starts_at, lead), shiftTime(form.ends_at, lead)) : null,
     );
 
     function close(): void {

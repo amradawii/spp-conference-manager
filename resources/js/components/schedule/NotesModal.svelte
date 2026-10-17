@@ -1,5 +1,6 @@
 <script lang="ts">
     import Button from '@/components/ui/Button.svelte';
+    import FormField from '@/components/ui/FormField.svelte';
     import Modal from '@/components/ui/Modal.svelte';
     import { getBoard, type NotesTarget } from '@/lib/board';
     import { editorPrompt } from '@/lib/editor.svelte';
@@ -23,24 +24,66 @@
 
     const form = useForm({ body: '' });
 
+    // Asked inline instead of through the shared name modal: a second dialog
+    // on top of this one fights over focus and freezes the page.
+    let editorName = $state('');
+    let nameError = $state<string | null>(null);
+    let savingName = $state(false);
+    let nameInput: HTMLInputElement | undefined = $state();
+    const needsName = $derived(!editorPrompt.name);
+
+    function withEditorName(action: () => void): void {
+        if (!needsName) {
+            action();
+            return;
+        }
+
+        const name = editorName.trim();
+        if (name.length < 2) {
+            nameError = 'Please enter your name first.';
+            nameInput?.focus();
+            return;
+        }
+
+        router.post(
+            board.routes.editor,
+            { name },
+            {
+                preserveScroll: true,
+                preserveState: true,
+                onStart: () => (savingName = true),
+                onFinish: () => (savingName = false),
+                onSuccess: () => {
+                    nameError = null;
+                    action();
+                },
+                onError: (errors) => (nameError = errors.name ?? 'Your name could not be saved. Please try again.'),
+            },
+        );
+    }
+
+    function showNameError(errors: Record<string, string>): void {
+        if (errors.editor_name) nameError = errors.editor_name;
+    }
+
     function add(event: SubmitEvent): void {
         event.preventDefault();
+        if (!form.body.trim()) return;
 
-        const submit = () =>
+        withEditorName(() =>
             form
                 .transform((data) => ({ ...data, notable_type: target.type, notable_id: target.id }))
                 .post(board.routes.notes, {
                     preserveScroll: true,
                     preserveState: true,
                     onSuccess: () => form.reset(),
-                    onError: (errors) => editorPrompt.recover(errors, submit),
-                });
-
-        editorPrompt.require(submit);
+                    onError: showNameError,
+                }),
+        );
     }
 
     function remove(note: Note): void {
-        const submit = () =>
+        withEditorName(() =>
             router.delete(board.routes.note(note.id), {
                 preserveScroll: true,
                 preserveState: true,
@@ -49,10 +92,9 @@
                     deletingId = null;
                     confirmingId = null;
                 },
-                onError: (errors) => editorPrompt.recover(errors, submit),
-            });
-
-        editorPrompt.require(submit);
+                onError: showNameError,
+            }),
+        );
     }
 
     function onBodyKeydown(event: KeyboardEvent): void {
@@ -64,7 +106,25 @@
 
 <Modal bind:open {title} description={context} {onClose}>
     <form onsubmit={add}>
-        <label for="note-body" class="sr-only">New note</label>
+        {#if needsName}
+            <div class="mb-4">
+                <FormField label="Your name" for="note-editor-name" error={nameError ?? undefined} hint="Asked once on this device. It appears next to your notes and changes.">
+                    <input
+                        id="note-editor-name"
+                        bind:this={nameInput}
+                        bind:value={editorName}
+                        oninput={() => (nameError = null)}
+                        class={inputClass}
+                        autocomplete="name"
+                        maxlength="60"
+                        placeholder="e.g. Yomna Hassan"
+                        aria-invalid={nameError ? 'true' : undefined}
+                        required
+                    />
+                </FormField>
+            </div>
+        {/if}
+        <label for="note-body" class={needsName ? 'mb-1.5 block text-sm font-medium text-ink-800' : 'sr-only'}>New note</label>
         <textarea
             id="note-body"
             bind:value={form.body}
@@ -80,10 +140,10 @@
         {/if}
         <div class="mt-2 flex items-center justify-between gap-3">
             <p class="text-xs text-ink-400">
-                {editorPrompt.name ? `Signed as ${editorPrompt.name}` : 'We will ask for your name first'}
+                {#if editorPrompt.name}Signed as {editorPrompt.name}{/if}
             </p>
-            <Button type="submit" variant="primary" size="sm" disabled={form.processing || !form.body.trim()}>
-                {form.processing ? 'Adding…' : 'Add note'}
+            <Button type="submit" variant="primary" size="sm" disabled={form.processing || savingName || !form.body.trim()}>
+                {form.processing || savingName ? 'Adding…' : 'Add note'}
             </Button>
         </div>
     </form>

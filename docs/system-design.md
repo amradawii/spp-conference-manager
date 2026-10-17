@@ -189,7 +189,7 @@ Derived flags, computed on the client with no database column (`resources/js/lib
 | Action | Interaction |
 |---|---|
 | Change status | Click pill → small menu (dot + label + one-line hint, "Current" marker) → select. The pill reads "Saving…" → toast "Status saved". |
-| Notes | "Add note" / "Notes (n)" opens a modal: textarea at the top (Ctrl+Enter submits, "Signed as {name}"), then notes newest first with author and relative time. Delete asks inline ("Delete this note for everyone?"). Available on items and sessions. |
+| Notes | "Add note" / "Notes (n)" opens a modal: on a device without a saved name, a required "Your name" field first; then the textarea (Ctrl+Enter submits, "Signed as {name}"), then notes newest first with author and relative time. Delete asks inline ("Delete this note for everyone?"). Available on items and sessions. |
 | Edit item / session | "Edit" opens a right-side drawer with a form. Moderators are edited here. Empty moderator fields show "Assign" as a link into the drawer. |
 | Add | "+ Add item to this session" at the end of each session; "+ Add session to Day N" at the end of each day. Hidden while filtering, so new rows never land in a filtered-out place. |
 | Delete | In the drawer footer, with an inline confirmation naming the record ("Delete Prof. Veera Rajendran and its notes?", "Delete this session and its 7 items?"). |
@@ -612,3 +612,7 @@ Each phase ends in a working, testable state.
 | 2026-10-17 | Summary counters for confirmed speakers and ready assets filter to what is still *pending*, the list the team actually works through |
 | 2026-10-17 | A search that matches a session (journal, title, moderator) shows the whole session |
 | 2026-10-17 | "+ Add" buttons hidden while filtering, so a new row never appears outside the visible scope |
+| 2026-10-17 | UI test feedback: times shown on a 12-hour clock ("10:00 AM – 04:30 PM"); they are still stored and sent as 24-hour `HH:MM`. Time column widened to 12.5rem |
+| 2026-10-17 | UI test feedback: the notes modal asks for the name in its own required field (first time only) instead of opening the name modal on top of it, which froze the page. Status menu and drawers keep the name modal |
+| 2026-10-17 | The status menu doesn't lock page scroll (`preventScroll={false}`): bits-ui's body lock could outlive a quickly closed menu and leave every button unclickable |
+| 2026-10-17 | Buttons, menu items, selects and radio cards get `cursor: pointer` (Tailwind v4 dropped it) |
