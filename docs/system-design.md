@@ -572,6 +572,7 @@ flowchart LR
 - The server never needs Node: assets are built once in CI and uploaded.
 - `.env`, `storage/` (logs, sessions, font cache) and the database are never touched by a deploy. Anything edited by hand in tracked files on the server is overwritten.
 - It can also be started by hand: GitHub → Actions → "Test and deploy" → Run workflow.
+- Without GitHub Actions (e.g. the account is locked), `scripts/deploy.ps1` does the same deploy from a Windows PC: it builds the assets, runs `deploy.sh` over SSH and uploads `public/build`. It needs the PC's SSH key in the site user's `authorized_keys` and refuses to run with unpushed changes.
 
 **One-time server setup (CloudPanel)**
 
