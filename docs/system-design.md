@@ -575,7 +575,7 @@ flowchart LR
 
 **One-time server setup (CloudPanel)**
 
-1. **Site** (already created, with the database and SSL): in the site's settings set **Root Directory** to `htdocs/<domain>/public` and the **PHP version** to 8.3 (8.2+ works).
+1. **Site** (already created, with the database and SSL): in the site's settings set **Root Directory** to `<domain>/public` (CloudPanel shows the `htdocs/` part itself) and the **PHP version** to 8.3 (8.2+ works).
 2. **SSH as the site user** (CloudPanel → Site → SSH/FTP → add your SSH key). All commands below run as that user.
 3. **Let the server read the private repo** with a read-only deploy key:
 
@@ -620,7 +620,7 @@ flowchart LR
 
 7. **First deploy:** Actions → "Test and deploy" → Run workflow (this also uploads `public/build` for the first time). After that, every `git push` to `main` updates the server in about 2 minutes, only if all tests pass.
 
-**Rules for production:** **never** run `migrate:fresh` or `key:generate` there: the first wipes every status and note (and changes the team link), the second signs everyone out and forgets all names. Schema changes go through new migrations, which the deploy runs automatically. Turn on CloudPanel's database backups (or `mysqldump` before risky changes).
+**Rules for production:** the deploy only runs `migrate --force` (new migrations only), and with `APP_ENV=production` the app refuses `migrate:fresh`, `migrate:refresh`, `migrate:reset` and `db:wipe` (`DB::prohibitDestructiveCommands` in `AppServiceProvider`). Still, **never** run `migrate:fresh` or `key:generate` there: the first wipes every status and note (and changes the team link), the second signs everyone out and forgets all names. Schema changes go through new migrations, which the deploy runs automatically. Turn on CloudPanel's database backups (or `mysqldump` before risky changes).
 
 **Shared hosting instead (no SSH deploys):** build locally (`composer install --no-dev -o`, `npm run build`), upload everything except `node_modules`, `.env` and `tests` outside `public_html`, point the document root at `public/`, then run the same `artisan` commands as in step 4.
 
