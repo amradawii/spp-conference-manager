@@ -59,11 +59,17 @@ export interface Day {
     sessions: ConferenceSession[];
 }
 
+/**
+ * The read-only programme ("/") receives the same shapes without the internal fields:
+ * statuses, notes, updated_by/updated_at and public_url. Components skip them when `board.readonly`.
+ */
 export interface Conference {
     id: number;
     name: string;
-    /** Relative URL of the board, e.g. "/s/{token}". All write routes hang off it. */
+    /** Relative URL of the board: "/s/{token}" for the team (all write routes hang off it), "/" for the read-only programme. */
     url: string;
+    /** Absolute URL of the read-only programme. Team board only. */
+    public_url?: string;
     cities: { conference: string; team: string };
     days: Day[];
 }

@@ -6,6 +6,8 @@ export type NotesTarget = { type: 'session' | 'item'; id: number };
 
 /** Everything deep components need from the board page, without prop drilling. */
 export interface Board {
+    /** The public programme: no statuses, notes or editing. */
+    readonly readonly: boolean;
     readonly routes: Routes;
     readonly cities: Conference['cities'];
     readonly query: string;

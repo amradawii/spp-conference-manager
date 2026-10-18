@@ -14,10 +14,15 @@ class ConferenceResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+        $team = ! $request->routeIs('schedule.public');
+
         return [
             'id' => $this->id,
             'name' => $this->name,
-            'url' => route('schedule.show', $this->resource, absolute: false),
+            'url' => $team ? route('schedule.show', $this->resource, absolute: false) : route('schedule.public', absolute: false),
+            $this->mergeWhen($team, fn () => [
+                'public_url' => route('schedule.public'),
+            ]),
             'cities' => [
                 'conference' => Conference::cityOf($this->timezone),
                 'team' => Conference::cityOf($this->team_timezone),

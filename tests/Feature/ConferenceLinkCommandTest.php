@@ -10,12 +10,13 @@ class ConferenceLinkCommandTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_it_prints_the_team_link(): void
+    public function test_it_prints_the_team_link_and_the_read_only_link(): void
     {
         $conference = Conference::factory()->create();
 
         $this->artisan('conference:link')
             ->expectsOutputToContain('/s/'.$conference->access_token)
+            ->expectsOutput(url('/'))
             ->assertSuccessful();
     }
 

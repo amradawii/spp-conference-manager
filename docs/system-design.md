@@ -47,7 +47,7 @@ time. The app therefore shows **every time in both Cairo and Prague**.
 | Topic | Decision | Why |
 |---|---|---|
 | Name | **SPP Conference Manager** (app). The event is seeded as "SPP Online Conference 2026" | Requested |
-| Access | One **secret team link** per conference (`/s/{token}`); no login | Fastest to share in WhatsApp; the 40-char token can't be guessed |
+| Access | One **secret team link** per conference (`/s/{token}`) for editing; no login. The **domain itself** (`/`) is the read-only programme for speakers and attendees (section 3.9) | Fastest to share in WhatsApp; the 40-char token can't be guessed; the public link is short and never changes |
 | Identity | Ask for the editor's name **once per device**, keep it in a long-lived cookie, show "Editing as Sara · change" | Every change is attributed without asking on every click |
 | Live updates | **None.** Data refreshes after your own edits, on page reload, or with the Refresh button | Edit volume is low; avoids websockets and polling |
 | Assets | **Status only**, two states: *Pending* / *Ready*. Team rule: set Ready only after confirming the files were received | Simple; files stay where the team already keeps them |
@@ -88,7 +88,7 @@ admin panel (conferences are created with a seeder/artisan) · per-session Zoom 
 │ SPP Online Conference 2026                                                    │
 │ 24–25 October 2026 · Online via Zoom                     Loaded 10:42 Refresh │
 │  ┌──────────────────────────────────────────────────────────────────────────┐ │
-└──│ Speakers confirmed │ Assets ready │ Not attending │ At risk │ Topics TBD │ │─┘ summary card
+└──│ Speakers confirmed │ Assets ready │ Not attending │ Warning │ Topics TBD │ │─┘ summary card
    │ 18/38 ▬▬▬▬         │ 9/38 ▬▬      │ 2             │ 1       │ 6          │ │  overlaps band
    └──────────────────────────────────────────────────────────────────────────┘
    ┌ TIME ZONES ─ Every time is shown twice: Cairo first, then Prague… Day 1     ┐
@@ -96,7 +96,7 @@ admin panel (conferences are created with a seeder/artisan) · per-session Zoom 
    └─────────────────────────────────────────────────────────────────────────────┘
    [ All | Day 1 | Day 2 ]  [ Session: All ▾ ]  [ ⌕ Search keynotes…   / ]
    [ Speaker: Any ▾ ]  [ Assets: Any ▾ ]
-   [At risk ×] Showing 6 of 38 speakers                          Clear filters
+   [Warning ×] Showing 6 of 38 speakers                          Clear filters
 
  DAY 1 · SUSTAINABLE MATERIALS                        10:00–16:30 Cairo  UTC+3   (sticky)
  Saturday 24 October                                  09:00–15:30 Prague UTC+2
@@ -125,7 +125,7 @@ admin panel (conferences are created with a seeder/artisan) · per-session Zoom 
 ```
 
 - **Header:** dark navy band (the SPP logo has a white wordmark), app name, conference name, dates, "Loaded at HH:MM · Refresh" and "Editing as {name}" (click to change) or "Set your name".
-- **Summary card:** overlaps the header band. Counts for the current Day/Session scope. Each counter is a toggle that filters to the rows behind it: *Speakers confirmed* → pending speakers, *Assets ready* → pending assets (both show "N pending" under the bar), *Not attending*, *At risk*, *Topics TBD*, *Missing moderator*. Counters at 0 are disabled.
+- **Summary card:** overlaps the header band. Counts for the current Day/Session scope. Each counter is a toggle that filters to the rows behind it: *Speakers confirmed* → pending speakers, *Assets ready* → pending assets (both show "N pending" under the bar), *Not attending*, *Warning* (absent, no assets), *Topics TBD*, *Missing moderator*. Counters at 0 are disabled.
 - **Time zones notice:** explains the two times and the clock change. It is generated from the data, so it disappears if both days have the same gap.
 - **Day header:** sticky while scrolling through that day, with the day's span in both cities and their UTC offsets.
 - **Session block:** time (both cities), number, journal, title, both moderators, notes, Edit.
@@ -171,7 +171,7 @@ Derived flags, computed on the client with no database column (`resources/js/lib
 
 | Flag | Rule | Display |
 |---|---|---|
-| **At risk** | Not attending + assets pending | Rose left border on the row + "No assets for IT to present" |
+| **At risk** (labelled "Warning") | Not attending + assets pending | Rose left border on the row + "No assets for IT to present" |
 | **IT presents** | Not attending + assets ready | Muted line "IT host presents the assets" |
 | **Topic TBD** | Speaker item with no topic | Amber "Topic TBD" (like the yellow highlight in the PDF) |
 | **Moderator missing** | Numbered session with an empty SPP or journal moderator | Amber "Not assigned" |
@@ -193,7 +193,8 @@ Derived flags, computed on the client with no database column (`resources/js/lib
 | Edit item / session | "Edit" opens a right-side drawer with a form. Moderators are edited here. Empty moderator fields show "Assign" as a link into the drawer. |
 | Add | "+ Add item to this session" at the end of each session; "+ Add session to Day N" at the end of each day. Hidden while filtering, so new rows never land in a filtered-out place. |
 | Delete | In the drawer footer, with an inline confirmation naming the record ("Delete Prof. Veera Rajendran and its notes?", "Delete this session and its 7 items?"). |
-| Editor name | First write action without a name → modal "Who is making changes?". Saved → the original action runs. If the cookie is lost later, the server's `editor_name` error re-opens the modal and retries. Clicking the name in the header opens "Change your name", which also has **Forget my name** (removes the cookie, e.g. on a shared or test device). |
+| Editor name | First write action without a name → modal "Who is making changes?". Saved → the original action runs. If the cookie is lost later, the server's `editor_name` error re-opens the modal and retries. Clicking the name in the header opens "Change your name", which also has **Reset my name** (removes the cookie, e.g. on a shared or test device). |
+| Read-only link | "Copy read-only link" in the header copies the programme link (the domain) for speakers and attendees. Toast: "Read-only link copied. Share it with speakers and attendees." |
 | Copy email | A small copy icon after every email copies it; the icon turns into a check and a toast confirms ("Copied nader83@vt.edu"). Always visible, so it works on phones. |
 | Print | "Print" in the header (desktop) prints the current view. Filters, buttons, notes links and toasts are hidden; each day starts on a new page; colours are kept. "Save as PDF" in the print dialog gives a clean programme PDF. |
 | Stale edit guard | If someone changed the record after you loaded the page, saving shows an amber notice: "Noha changed this at 11:07 (Cairo time) after you opened it. Close to see their version, or save again to replace it with yours." The button becomes "Save anyway". |
@@ -208,7 +209,7 @@ Times are entered in the drawer in **Prague time** (the programme's time); the C
 - **Session:** select that depends on Day. With Day 1 selected it lists `Session 1 · IN` … `Session 5 · …` plus the plenary blocks. With All it lists every session grouped by day. Picking another day clears a session that isn't on it.
 - **Search:** matches speaker name, role, affiliation, topic, label and email, plus the session's journal, title and moderators (a session match keeps the whole session, so "Sara" lists every session she moderates). Case- and accent-insensitive (`Šárka` = `sarka`); matches are highlighted.
 - **Speaker status** and **Assets status** selects.
-- **Flag** (set from the summary counters): at risk, topic TBD, missing moderator. Shown as a removable chip.
+- **Flag** (set from the summary counters): warning (at risk), topic TBD, missing moderator. Shown as a removable chip.
 - All filters combine with AND. Sessions with no matching items are hidden. When no filter is active, every session is shown.
 - State lives in the query string: `?day=1&session=12&q=nader&speaker=pending&assets=pending&flag=at_risk`. Updated 250 ms after typing stops, with Inertia's `router.replace` (no history spam, no server round-trip; keeps Inertia's history state intact). Invalid values in a pasted URL are ignored.
 - Empty state: "Nothing matches these filters" + "Clear filters".
@@ -228,6 +229,31 @@ Times are entered in the drawer in **Prague time** (the programme's time); the C
 - **Accessibility:** contrast ≥ 4.5:1 for text (including the muted `ink-400` and the programme colours), visible focus rings, a "Skip to schedule" link as the first Tab stop, status is never conveyed by color alone (always a label), dialogs trap focus, icon buttons have labels.
 
 Tokens live in `resources/css/app.css` (Tailwind v4 `@theme`): `ink-50…950`, `canvas`, `line`, `line-strong`, `stripe`, `brand-300…700`, `brand-teal`, `journal`, `talk`, `spp`, plus the `label-caps` utility (small UI labels) and the larger, bold `kicker` utility (programme labels: day, "SESSION 1", "PLENARY", "KEYNOTE 1", moderator roles). Page width: `max-w-7xl` (1280 px).
+
+### 3.9 Read-only programme (add-on)
+
+The team sends one link to keynote speakers and attendees: **the domain itself** (e.g. `https://schedule.example.com/`). It always shows the newest conference, read-only.
+
+| | Team board `/s/{token}` | Read-only programme `/` |
+|---|---|---|
+| Who | The SPP team | Speakers, attendees, anyone with the domain |
+| Header kicker | "Team schedule board" | "Conference programme" |
+| Header actions | Copy read-only link · Print · Refresh · Editing as | Print |
+| Summary counters | Yes | No |
+| Time zones notice | Yes | Yes |
+| Filters | Day, session, search, speaker status, assets status | Day, session, search |
+| Status pills, warnings, "IT presents" | Yes | No |
+| Notes, Edit, Add, Assign, "Noha · 2 hr. ago" | Yes | No |
+| Missing moderator | Amber "Not assigned" + Assign | Muted "To be announced" |
+| Emails | Links + copy icon | Plain links (they were in the shared PDF) |
+| Topic TBD highlight, colours, stripes, print layout | Yes | Yes |
+
+- **Why the domain and not a second token:** the link is short, it never changes (not after `migrate:fresh`, not after rotating the team link), and the old "This schedule is private" page had nothing useful to show. The team link stays secret and is the only way to edit.
+- **Copy button:** "Copy read-only link" in the team header copies `public_url` (the domain).
+- **No data leaks:** the same JSON resources are used, but on the `schedule.public` route they drop statuses, notes, `updated_by`/`updated_at`, the team URL and `public_url`. The page source therefore contains nothing internal. Write routes only exist under `/s/{token}`.
+- **Same components:** `Schedule/Public.svelte` reuses the header, time-zones notice, filter bar (`statusFilters={false}`) and day/session/item components. They check `board.readonly` to hide statuses and actions and switch to two columns (time · details). Status filters in a pasted URL are ignored.
+- **No conference yet:** `/` shows "The programme will be published soon" (`Home.svelte`).
+- Still `noindex` (emails are on the page), still `no-store`.
 
 ---
 
@@ -365,8 +391,8 @@ middleware and `throttle:60,1`; saving the name uses `throttle:20,1`.
 
 | Method | URI | Controller | Purpose | Phase |
 |---|---|---|---|---|
-| GET | `/` | `Route::inertia('Home')` | Plain page: "This schedule is private" | ✅ 2 |
-| GET | `/s/{conference:access_token}` | `ScheduleController@show` | The board | ✅ 2 |
+| GET | `/` | `ScheduleController@public` | Read-only programme of the newest conference (`Home` "published soon" page when there is none) | ✅ add-on |
+| GET | `/s/{conference:access_token}` | `ScheduleController@show` | The team board (editing) | ✅ 2 |
 | POST | `/s/{token}/editor` | `EditorController@store` | Save editor name (cookie) | ✅ 4 |
 | DELETE | `/s/{token}/editor` | `EditorController@destroy` | Forget the name on this device | ✅ 7 |
 | PATCH | `/s/{token}/items/{item}/status` | `AgendaItemStatusController@update` | Quick status change | ✅ 4 |
@@ -392,9 +418,10 @@ one conference can never reach another conference's rows. A test covers this.
 - **Model hooks:** deleting a session deletes its items' notes and its own notes (polymorphic rows aren't covered by foreign-key cascades); deleting an item deletes its notes.
 - **Item type rules:** segments never carry speaker fields and their assets are "Not needed"; turning a segment into a speaker item starts assets at Pending; editing details never changes statuses.
 - `HandleInertiaRequests` **shared props:** `editor: { name }`. Toasts use Inertia v3 flash data (`Inertia::flash('toast', …)`).
-- **Artisan:** `php artisan conference:link {conference?} {--rotate}` prints the team URL and, with `--rotate`, generates a new token (use it if the link leaks). ✅
+- **Artisan:** `php artisan conference:link {conference?} {--rotate}` prints the team URL and the read-only programme URL and, with `--rotate`, generates a new team token (use it if the team link leaks; the read-only link is unaffected). ✅
+- **Read-only payload:** `ConferenceResource`, `ConferenceSessionResource` and `AgendaItemResource` check `$request->routeIs('schedule.public')` and `mergeWhen`/`mergeUnless` the internal fields, so one set of resources serves both pages. ✅
 - **Privacy:** `<meta name="robots" content="noindex, nofollow">`, `<meta name="referrer" content="same-origin">`, and `Disallow: /` in `robots.txt`. `same-origin` still hides the secret URL from other sites, but keeps the `Referer` header on our own requests, which Laravel's `back()` redirects need. ✅
-- **Security headers** (`AddSecurityHeaders`, on every web response): `X-Frame-Options: DENY`, `X-Content-Type-Options: nosniff`, `Referrer-Policy: same-origin`, `X-Robots-Tag: noindex, nofollow`. The board also gets `Cache-Control: private, no-store`, so shared proxies and the browser's back-forward cache never keep a copy of the private schedule. ✅
+- **Security headers** (`AddSecurityHeaders`, on every web response): `X-Frame-Options: DENY`, `X-Content-Type-Options: nosniff`, `Referrer-Policy: same-origin`, `X-Robots-Tag: noindex, nofollow`. The board also gets `Cache-Control: private, no-store`, so shared proxies and the browser's back-forward cache never keep a copy of the private schedule. The read-only programme (`schedule.public`) gets the same headers. ✅
 
 ### 4.5 Frontend structure (as built)
 
@@ -414,14 +441,15 @@ resources/
       filters.ts (+ test)             pure filters + URL (de)serialization + session labels
       status.ts                       status labels, tones and hints
       routes.ts                       tiny URL helpers built from conference.url (no Ziggy)
-      board.ts                        page context (routes, query, open notes/drawers) + record lookups
+      board.ts                        page context (readonly flag, routes, query, open notes/drawers) + record lookups
       editor.svelte.ts                editorPrompt: ask for the name once, then run the action
       toasts.svelte.ts                toast queue
       clipboard.ts                    copy text (Clipboard API, with a fallback for plain-http hosts)
-      ui.ts                           shared input classes
+      ui.ts                           shared input classes, row columns (team / read-only)
     pages/
-      Home.svelte
-      Schedule/Show.svelte            filter state, URL sync, router events, modals/drawers by id
+      Home.svelte                     "The programme will be published soon" (no conference yet)
+      Schedule/Show.svelte            team board: filter state, URL sync, router events, modals/drawers by id
+      Schedule/Public.svelte          read-only programme: filters + URL sync, no editing
     components/
       AppHeader.svelte
       ui/                             Button, Select, Modal, Drawer (bits-ui Dialog), FormField,
@@ -469,7 +497,7 @@ resources/
 |---|---|
 | `composer dev` | `php artisan serve` + Vite dev server |
 | `php artisan migrate:fresh --seed` | Rebuild the DB with the PDF programme |
-| `php artisan conference:link` | Print the team link (`--rotate` for a new one) |
+| `php artisan conference:link` | Print the team link and the read-only programme link (`--rotate` for a new team link) |
 | `php artisan test` | PHP feature tests (MySQL test DB) |
 | `npm test` | Vitest unit tests |
 | `npm run check` | svelte-check (types), fails on warnings |
@@ -478,7 +506,7 @@ resources/
 
 **Test strategy (no more than needed):**
 
-- **Feature tests (PHPUnit, 43):** board loads with a valid token and returns 404 for a wrong one; the home page reveals nothing; noindex/referrer meta and security headers; Cairo/Prague conversion across the clock change; item ordering; notes order; seeder counts, corrections and idempotency; link command and token rotation; editor name cookie, validation and forgetting it; writes without a name rejected; status persistence with `updated_by`; notes create/delete/validation; session and item create/update/delete, validation, type rules, stale guard; one conference can't read or change another's rows.
+- **Feature tests (PHPUnit, 47):** board loads with a valid token and returns 404 for a wrong one; the home page shows the newest conference read-only without statuses, notes, `updated_by` or the team link, can't write, and falls back to "published soon"; noindex/referrer meta and security headers; Cairo/Prague conversion across the clock change; item ordering; notes order; seeder counts, corrections and idempotency; link command and token rotation; editor name cookie, validation and resetting it; writes without a name rejected; status persistence with `updated_by`; notes create/delete/validation; session and item create/update/delete, validation, type rules, stale guard; one conference can't read or change another's rows.
 - **Unit tests (Vitest, 29):** derived flags, summary counts, date/offset/relative-time formatting, time shifting, accent-insensitive search and highlighting, filter combinations, URL round-trip and validation, session labels.
 - **Browser check:** a throwaway script drives headless Edge over the DevTools protocol through the main flows (status change with the name prompt, notes, stale edit, drawers, search, summary shortcut, copy email, forget name, print media, mobile at 390 px) and fails on console errors.
 
@@ -486,7 +514,7 @@ resources/
 
 The name lives in an encrypted cookie in the browser, so `migrate:fresh` doesn't remove it and no server command can clear a single browser. Use one of:
 
-1. **Forget my name:** click your name in the header → "Forget my name". The next change asks for the name again.
+1. **Reset my name:** click your name in the header → "Reset my name". The next change asks for the name again.
 2. A **private / incognito window** always starts without a name.
 3. Clear the site's cookies in the browser (site settings for `127.0.0.1`).
 
@@ -522,7 +550,7 @@ SESSION_SECURE_COOKIE=true            # session and editor-name cookies only ove
    php artisan migrate --force
    php artisan db:seed --force   # seeds the PDF programme; safe to re-run, it skips an existing conference
    php artisan optimize          # caches config, routes, views
-   php artisan conference:link   # prints the team link to share
+   php artisan conference:link   # prints the team link (editing) and the read-only link (the domain)
    ```
 
 6. Make `storage/` and `bootstrap/cache/` writable by PHP. Enable the host's free SSL (AutoSSL / Let's Encrypt).
@@ -642,15 +670,25 @@ Each phase ends in a working, testable state.
 - [x] Fixes from the UI test: pointer cursor, notes name field, 12-hour times, time-zones box border
 - [x] Programme colours from the PDF, alternating row backgrounds
 - [x] Copy icon after every email (always visible, so it works on phones)
-- [x] "Forget my name" on the device (`DELETE editor`)
+- [x] "Reset my name" on the device (`DELETE editor`)
 - [x] Accessibility pass: skip link, contrast of muted text, labelled icon buttons, focus rings
 - [x] Security headers; board responses not cached
 - [x] Print stylesheet (`print:` variants) + "Print" button: a clean PDF can still be produced from the browser
 - [x] Deployment guide (section 5.2)
 - [ ] Mobile pass on a real phone via the WhatsApp in-app browser (team)
-- [ ] Deploy, run `conference:link` and share the link in the team group (team)
+- [ ] Deploy, run `conference:link`, share the team link in the team group and the domain with speakers and attendees (team)
 
 **Done when:** the team uses the link instead of PDF drafts.
+
+### Add-on: Read-only programme ✅
+
+- [x] `/` renders the newest conference read-only (`ScheduleController@public`); "published soon" page when there is none
+- [x] Resources drop statuses, notes, `updated_by`/`updated_at`, team URL and `public_url` on the public route
+- [x] `Schedule/Public.svelte`: header ("Conference programme", Print), time zones, day/session/search filters, programme without statuses or actions, plain email links, "To be announced" for missing moderators
+- [x] "Copy read-only link" in the team header; `conference:link` prints both links
+- [x] Tests: programme shown, nothing internal leaks, no writes, empty-database fallback, security headers
+
+**Done when:** speakers and attendees open the domain and see the current programme, always up to date.
 
 ---
 
@@ -677,6 +715,9 @@ Each phase ends in a working, testable state.
 | 2026-10-17 | Three programme colours from the PDF (journal blue, talk orange, SPP red), darkened to pass contrast and used only on labels, journal names and a faint session-header tint. Status colours stay reserved for things that need action |
 | 2026-10-17 | Item rows alternate white / light warm gray (`stripe`) |
 | 2026-10-17 | Copy icon after each email, always visible (the earlier concern was a hover-only button, which phones can't use). Falls back to `execCommand('copy')` when the Clipboard API is unavailable (plain http) |
-| 2026-10-17 | "Forget my name" instead of a server command: a server can't clear one browser's cookie; `key:generate` resets every device |
+| 2026-10-17 | "Reset my name" (first called "Forget my name") instead of a server command: a server can't clear one browser's cookie; `key:generate` resets every device |
 | 2026-10-17 | Security headers middleware; the board is `Cache-Control: private, no-store` so the private schedule is never stored by proxies or the back-forward cache |
 | 2026-10-17 | Printing keeps colours (`print-color-adjust: exact`), hides all controls and starts each day on a new page |
+| 2026-10-17 | Summary label "At risk" renamed "Warning"; "Forget my name" renamed "Reset my name" |
+| 2026-10-18 | Read-only programme on the domain root instead of a second secret token: short, permanent link for speakers and attendees; the team link is for editing only. The "This schedule is private" page is gone (kept only as "published soon" when no conference exists) |
+| 2026-10-18 | Read-only view hides statuses, status filters, notes, editing and the summary; keeps time zones, day/session/search filters and emails (already public in the shared PDF), shown as plain links |

@@ -53,7 +53,7 @@
             count: summary.notAttending,
         },
         {
-            label: 'At risk',
+            label: 'Warning',
             value: String(summary.atRisk),
             hint: 'Absent, no assets',
             tone: summary.atRisk ? 'negative' : 'neutral',

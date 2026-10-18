@@ -4,6 +4,7 @@
     import { getBoard } from '@/lib/board';
     import { formatRelative } from '@/lib/format';
     import { hasSpeaker, isAtRisk, isTopicTbd, itPresents, tracksAssets } from '@/lib/stats';
+    import { rowColumns } from '@/lib/ui';
     import type { AgendaItem } from '@/types/models';
     import RecordActions from './RecordActions.svelte';
     import StatusMenu from './StatusMenu.svelte';
@@ -13,10 +14,10 @@
 
     const board = getBoard();
     const details = $derived([item.speaker_role, item.affiliation].filter(Boolean).join(' · '));
-    const atRisk = $derived(isAtRisk(item));
+    const atRisk = $derived(!board.readonly && isAtRisk(item));
 </script>
 
-<li class="relative grid gap-3 px-5 py-4 even:bg-stripe sm:px-6 md:grid-cols-[12.5rem_minmax(0,1fr)_15rem] md:gap-6 print:break-inside-avoid print:grid-cols-[12.5rem_minmax(0,1fr)_12rem] print:gap-6">
+<li class="relative grid gap-3 px-5 py-4 even:bg-stripe sm:px-6 md:gap-6 print:break-inside-avoid print:gap-6 {rowColumns(board.readonly)}">
     {#if atRisk}
         <span class="absolute inset-y-0 left-0 w-[3px] bg-rose-500" aria-hidden="true"></span>
     {/if}
@@ -60,7 +61,9 @@
                             >
                                 <Highlight text={email} query={board.query} />
                             </a>
-                            <CopyButton text={email} label="Copy {email}" />
+                            {#if !board.readonly}
+                                <CopyButton text={email} label="Copy {email}" />
+                            {/if}
                         </span>
                     {/each}
                 </p>
@@ -72,38 +75,40 @@
         {/if}
     </div>
 
-    <div class="flex flex-col gap-2.5 md:pt-0.5">
-        {#if hasSpeaker(item)}
-            <dl class="flex flex-wrap gap-x-5 gap-y-2 md:flex-col print:flex-col">
-                <div class="flex items-center gap-2.5">
-                    <dt class="w-14 text-xs text-ink-500">Speaker</dt>
-                    <dd><StatusMenu {item} field="speaker" /></dd>
-                </div>
-                {#if tracksAssets(item)}
+    {#if !board.readonly}
+        <div class="flex flex-col gap-2.5 md:pt-0.5">
+            {#if hasSpeaker(item)}
+                <dl class="flex flex-wrap gap-x-5 gap-y-2 md:flex-col print:flex-col">
                     <div class="flex items-center gap-2.5">
-                        <dt class="w-14 text-xs text-ink-500">Assets</dt>
-                        <dd><StatusMenu {item} field="assets" /></dd>
+                        <dt class="w-14 text-xs text-ink-500">Speaker</dt>
+                        <dd><StatusMenu {item} field="speaker" /></dd>
                     </div>
+                    {#if tracksAssets(item)}
+                        <div class="flex items-center gap-2.5">
+                            <dt class="w-14 text-xs text-ink-500">Assets</dt>
+                            <dd><StatusMenu {item} field="assets" /></dd>
+                        </div>
+                    {/if}
+                </dl>
+
+                {#if atRisk}
+                    <p class="text-xs font-medium text-rose-700">No assets for IT to present</p>
+                {:else if itPresents(item)}
+                    <p class="text-xs text-ink-500">IT host presents the assets</p>
                 {/if}
-            </dl>
-
-            {#if atRisk}
-                <p class="text-xs font-medium text-rose-700">No assets for IT to present</p>
-            {:else if itPresents(item)}
-                <p class="text-xs text-ink-500">IT host presents the assets</p>
             {/if}
-        {/if}
 
-        <RecordActions
-            notesCount={item.notes.length}
-            onNotes={() => board.openNotes({ type: 'item', id: item.id })}
-            onEdit={() => board.editItem(item)}
-        />
+            <RecordActions
+                notesCount={item.notes.length}
+                onNotes={() => board.openNotes({ type: 'item', id: item.id })}
+                onEdit={() => board.editItem(item)}
+            />
 
-        {#if item.updated_by}
-            <p class="text-xs text-ink-400 print:hidden" title={new Date(item.updated_at).toLocaleString()}>
-                {item.updated_by} · {formatRelative(item.updated_at)}
-            </p>
-        {/if}
-    </div>
+            {#if item.updated_by}
+                <p class="text-xs text-ink-400 print:hidden" title={new Date(item.updated_at).toLocaleString()}>
+                    {item.updated_by} · {formatRelative(item.updated_at)}
+                </p>
+            {/if}
+        </div>
+    {/if}
 </li>

@@ -15,16 +15,6 @@ class ScheduleBoardTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_home_page_does_not_reveal_any_conference(): void
-    {
-        Conference::factory()->create(['name' => 'Secret Conference']);
-
-        $this->get('/')
-            ->assertOk()
-            ->assertDontSee('Secret Conference')
-            ->assertInertia(fn (Assert $page) => $page->component('Home')->missing('conference'));
-    }
-
     public function test_board_renders_for_a_valid_token(): void
     {
         $item = AgendaItem::factory()->create();
@@ -40,6 +30,7 @@ class ScheduleBoardTest extends TestCase
                 ->has('conference.days.0.sessions.0.items', 1)
                 ->where('conference.days.0.sessions.0.items.0.speaker_name', $item->speaker_name)
                 ->where('conference.days.0.sessions.0.items.0.speaker_status', 'pending')
+                ->where('conference.public_url', url('/'))
                 ->missing('conference.access_token'));
     }
 

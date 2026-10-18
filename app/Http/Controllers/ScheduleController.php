@@ -20,4 +20,20 @@ class ScheduleController extends Controller
             'conference' => ConferenceResource::make($conference),
         ]);
     }
+
+    /**
+     * The read-only programme of the newest conference, for speakers and attendees.
+     */
+    public function public(): Response
+    {
+        $conference = Conference::latest('id')->with('days.sessions.items')->first();
+
+        if ($conference === null) {
+            return Inertia::render('Home');
+        }
+
+        return Inertia::render('Schedule/Public', [
+            'conference' => ConferenceResource::make($conference),
+        ]);
+    }
 }

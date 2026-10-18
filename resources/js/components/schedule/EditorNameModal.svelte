@@ -69,7 +69,7 @@
     {#snippet footer()}
         {#if editorPrompt.name}
             <Button variant="danger" class="mr-auto -ml-2" disabled={forgetting} onclick={forget}>
-                {forgetting ? 'Removing…' : 'Forget my name'}
+                {forgetting ? 'Resetting…' : 'Reset my name'}
             </Button>
         {/if}
         <Button variant="ghost" onclick={() => editorPrompt.dismiss()}>Cancel</Button>

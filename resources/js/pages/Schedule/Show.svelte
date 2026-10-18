@@ -11,6 +11,7 @@
     import Button from '@/components/ui/Button.svelte';
     import Toaster from '@/components/ui/Toaster.svelte';
     import { locateItem, locateSession, setBoard, type NotesTarget } from '@/lib/board';
+    import { copyText } from '@/lib/clipboard';
     import { editorPrompt } from '@/lib/editor.svelte';
     import { applyFilters, countSpeakers, emptyFilters, isFiltering, parseFilters, scopeDays, sessionLabel, toQueryString, type Filters } from '@/lib/filters';
     import { formatDateSpan, formatDay } from '@/lib/format';
@@ -60,6 +61,7 @@
     });
 
     setBoard({
+        readonly: false,
         routes,
         get cities() {
             return conference.cities;
@@ -134,6 +136,16 @@
         filters = emptyFilters();
     }
 
+    async function copyPublicLink(): Promise<void> {
+        const url = conference.public_url ?? '';
+        try {
+            await copyText(url);
+            toasts.push('Read-only link copied. Share it with speakers and attendees.');
+        } catch {
+            toasts.push(`Could not copy. The read-only link is ${url}`, 'error');
+        }
+    }
+
     function refresh(): void {
         router.reload({
             onStart: () => (refreshing = true),
@@ -150,6 +162,14 @@
 {#snippet headerActions()}
     <div class="flex items-center gap-3 text-xs text-ink-300 sm:gap-4 print:hidden">
         <span class="hidden md:inline">Loaded at {loadedLabel}</span>
+        <button
+            type="button"
+            onclick={copyPublicLink}
+            class="rounded-md px-2 py-1 font-medium text-ink-200 transition-colors hover:bg-white/10 hover:text-white"
+            title="Copy the read-only programme link for speakers and attendees"
+        >
+            <span class="hidden sm:inline">Copy</span> read-only link
+        </button>
         <button
             type="button"
             onclick={() => window.print()}

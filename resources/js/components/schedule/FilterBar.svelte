@@ -14,8 +14,9 @@
         shown,
         total,
         filtering,
+        statusFilters = true,
         onClear,
-    }: { days: Day[]; filters: Filters; shown: number; total: number; filtering: boolean; onClear: () => void } = $props();
+    }: { days: Day[]; filters: Filters; shown: number; total: number; filtering: boolean; statusFilters?: boolean; onClear: () => void } = $props();
 
     let searchInput: HTMLInputElement | undefined = $state();
     let moreOpen = $state(false);
@@ -151,9 +152,11 @@
         </div>
     </div>
 
-    <div class="mt-3 hidden flex-wrap items-center gap-3 sm:flex">
-        {@render statusSelects()}
-    </div>
+    {#if statusFilters}
+        <div class="mt-3 hidden flex-wrap items-center gap-3 sm:flex">
+            {@render statusSelects()}
+        </div>
+    {/if}
 
     <button
         type="button"
@@ -173,7 +176,9 @@
     {#if moreOpen}
         <div class="mt-2 grid gap-2 sm:hidden">
             {@render sessionSelect()}
-            {@render statusSelects()}
+            {#if statusFilters}
+                {@render statusSelects()}
+            {/if}
         </div>
     {/if}
 

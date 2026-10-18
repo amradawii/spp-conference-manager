@@ -20,7 +20,7 @@ export const assetsFilterValues: AssetsFilter[] = ['pending', 'ready'];
 export const flagFilterValues: FlagFilter[] = ['at_risk', 'topic_tbd', 'missing_moderator'];
 
 export const flagLabels: Record<FlagFilter, string> = {
-    at_risk: 'At risk',
+    at_risk: 'Warning',
     topic_tbd: 'Topic TBD',
     missing_moderator: 'Missing moderator',
 };

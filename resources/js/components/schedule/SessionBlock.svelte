@@ -3,6 +3,7 @@
     import { getBoard } from '@/lib/board';
     import { formatRelative } from '@/lib/format';
     import { missingModerators } from '@/lib/stats';
+    import { rowColumns } from '@/lib/ui';
     import type { ConferenceSession } from '@/types/models';
     import AgendaItemRow from './AgendaItemRow.svelte';
     import RecordActions from './RecordActions.svelte';
@@ -24,7 +25,7 @@
     class="overflow-hidden rounded-xl border border-line bg-white shadow-[0_1px_2px_rgba(11,20,38,0.04)] print:shadow-none"
 >
     <header
-        class="grid gap-3 px-5 py-5 sm:px-6 md:grid-cols-[12.5rem_minmax(0,1fr)_15rem] md:gap-6 print:break-inside-avoid print:grid-cols-[12.5rem_minmax(0,1fr)_12rem] print:gap-6 print:break-after-avoid {isSession
+        class="grid gap-3 px-5 py-5 sm:px-6 md:gap-6 print:break-inside-avoid print:gap-6 print:break-after-avoid {rowColumns(board.readonly)} {isSession
             ? 'bg-journal/[0.035]'
             : 'bg-ink-50/60'}"
     >
@@ -53,7 +54,9 @@
                         <div>
                             <dt class="kicker {moderator.tone}">{moderator.label}</dt>
                             <dd class="mt-0.5 text-[15px]">
-                                {#if moderator.missing}
+                                {#if moderator.missing && board.readonly}
+                                    <span class="text-ink-500">To be announced</span>
+                                {:else if moderator.missing}
                                     <span class="inline-flex items-center gap-1.5 font-medium text-amber-700">
                                         <span class="size-1.5 rounded-full bg-amber-500" aria-hidden="true"></span>
                                         Not assigned
@@ -75,18 +78,20 @@
             {/if}
         </div>
 
-        <div class="flex flex-col gap-1.5 md:pt-0.5">
-            <RecordActions
-                notesCount={session.notes.length}
-                onNotes={() => board.openNotes({ type: 'session', id: session.id })}
-                onEdit={() => board.editSession(session)}
-            />
-            {#if session.updated_by}
-                <p class="text-xs text-ink-400 print:hidden" title={new Date(session.updated_at).toLocaleString()}>
-                    {session.updated_by} · {formatRelative(session.updated_at)}
-                </p>
-            {/if}
-        </div>
+        {#if !board.readonly}
+            <div class="flex flex-col gap-1.5 md:pt-0.5">
+                <RecordActions
+                    notesCount={session.notes.length}
+                    onNotes={() => board.openNotes({ type: 'session', id: session.id })}
+                    onEdit={() => board.editSession(session)}
+                />
+                {#if session.updated_by}
+                    <p class="text-xs text-ink-400 print:hidden" title={new Date(session.updated_at).toLocaleString()}>
+                        {session.updated_by} · {formatRelative(session.updated_at)}
+                    </p>
+                {/if}
+            </div>
+        {/if}
     </header>
 
     {#if session.items.length}
@@ -97,7 +102,7 @@
         </ol>
     {/if}
 
-    {#if !board.isFiltering}
+    {#if !board.isFiltering && !board.readonly}
         <div class="border-t border-line px-5 py-2 sm:px-6 print:hidden">
             <button
                 type="button"

@@ -8,7 +8,7 @@ use App\Http\Controllers\NoteController;
 use App\Http\Controllers\ScheduleController;
 use Illuminate\Support\Facades\Route;
 
-Route::inertia('/', 'Home')->name('home');
+Route::get('/', [ScheduleController::class, 'public'])->name('schedule.public');
 
 Route::prefix('s/{conference:access_token}')->scopeBindings()->group(function () {
     Route::get('/', [ScheduleController::class, 'show'])->name('schedule.show');

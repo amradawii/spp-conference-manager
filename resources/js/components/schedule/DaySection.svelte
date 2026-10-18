@@ -36,7 +36,7 @@
             <SessionBlock {session} />
         {/each}
 
-        {#if !board.isFiltering}
+        {#if !board.isFiltering && !board.readonly}
             <button
                 type="button"
                 onclick={() => board.addSession(day)}

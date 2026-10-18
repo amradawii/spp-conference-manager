@@ -24,11 +24,13 @@ class AgendaItemResource extends JsonResource
             'affiliation' => $this->affiliation,
             'emails' => $this->emails ?? [],
             'title' => $this->title,
-            'speaker_status' => $this->speaker_status,
-            'assets_status' => $this->assets_status,
-            'updated_by' => $this->updated_by,
-            'updated_at' => $this->updated_at?->toIso8601String(),
-            'notes' => NoteResource::collection($this->notes),
+            $this->mergeUnless($request->routeIs('schedule.public'), fn () => [
+                'speaker_status' => $this->speaker_status,
+                'assets_status' => $this->assets_status,
+                'updated_by' => $this->updated_by,
+                'updated_at' => $this->updated_at?->toIso8601String(),
+                'notes' => NoteResource::collection($this->notes),
+            ]),
         ];
     }
 }

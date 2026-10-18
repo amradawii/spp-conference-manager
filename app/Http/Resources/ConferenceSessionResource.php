@@ -23,10 +23,12 @@ class ConferenceSessionResource extends JsonResource
             'time' => $this->day->timeRange($this->starts_at, $this->ends_at),
             'spp_moderator' => $this->spp_moderator,
             'journal_moderator' => $this->journal_moderator,
-            'updated_by' => $this->updated_by,
-            'updated_at' => $this->updated_at?->toIso8601String(),
             'items' => AgendaItemResource::collection($this->items),
-            'notes' => NoteResource::collection($this->notes),
+            $this->mergeUnless($request->routeIs('schedule.public'), fn () => [
+                'updated_by' => $this->updated_by,
+                'updated_at' => $this->updated_at?->toIso8601String(),
+                'notes' => NoteResource::collection($this->notes),
+            ]),
         ];
     }
 }

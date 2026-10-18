@@ -1,7 +1,12 @@
 <script lang="ts">
     import type { Snippet } from 'svelte';
 
-    let { title, subtitle, actions }: { title: string; subtitle?: string; actions?: Snippet } = $props();
+    let {
+        title,
+        subtitle,
+        kicker = 'Team schedule board',
+        actions,
+    }: { title: string; subtitle?: string; kicker?: string; actions?: Snippet } = $props();
 </script>
 
 <header class="bg-ink-950 text-white">
@@ -16,7 +21,7 @@
         </div>
 
         <div class="pt-8 pb-16 sm:pt-10 sm:pb-20">
-            <p class="label-caps text-brand-300">Team schedule board</p>
+            <p class="label-caps text-brand-300">{kicker}</p>
             <h1 class="mt-2 font-serif text-3xl font-semibold tracking-tight sm:text-4xl">{title}</h1>
             {#if subtitle}
                 <p class="mt-3 text-sm text-ink-300">{subtitle}</p>
