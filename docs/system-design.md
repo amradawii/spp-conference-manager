@@ -196,7 +196,8 @@ Derived flags, computed on the client with no database column (`resources/js/lib
 | Editor name | First write action without a name → modal "Who is making changes?". Saved → the original action runs. If the cookie is lost later, the server's `editor_name` error re-opens the modal and retries. Clicking the name in the header opens "Change your name", which also has **Reset my name** (removes the cookie, e.g. on a shared or test device). |
 | Read-only link | "Copy read-only link" in the header copies the programme link (the domain) for speakers and attendees. Toast: "Read-only link copied. Share it with speakers and attendees." |
 | Copy email | A small copy icon after every email copies it; the icon turns into a check and a toast confirms ("Copied nader83@vt.edu"). Always visible, so it works on phones. |
-| Print | "Print" in the header (desktop) prints the current view. Filters, buttons, notes links and toasts are hidden; each day starts on a new page; colours are kept. "Save as PDF" in the print dialog gives a clean programme PDF. |
+| Save PDF | "Save PDF" in the header downloads the **read-only programme as an A4 PDF** (`/programme.pdf`, section 3.10), on both pages. It always contains the full programme and never shows statuses or notes. |
+| Print (Ctrl+P) | Still supported as a fallback: filters, buttons, notes links and toasts are hidden; each day starts on a new page; colours are kept. Session cards drop their side/top borders when printed, so a header moved to the next page never leaves an empty box behind. |
 | Stale edit guard | If someone changed the record after you loaded the page, saving shows an amber notice: "Noha changed this at 11:07 (Cairo time) after you opened it. Close to see their version, or save again to replace it with yours." The button becomes "Save anyway". |
 | Errors | Toasts for a deleted record (404, then the board refreshes), an expired page (419), rate limit (429), server errors and lost connection. |
 | Keyboard | `/` focuses search · `Esc` clears the search, closes modal/drawer/menu. |
@@ -238,7 +239,7 @@ The team sends one link to keynote speakers and attendees: **the domain itself**
 |---|---|---|
 | Who | The SPP team | Speakers, attendees, anyone with the domain |
 | Header kicker | "Team schedule board" | "Conference programme" |
-| Header actions | Copy read-only link · Print · Refresh · Editing as | Print |
+| Header actions | Copy read-only link · Save PDF · Refresh · Editing as | Save PDF |
 | Summary counters | Yes | No |
 | Time zones notice | Yes | Yes |
 | Filters | Day, session, search, speaker status, assets status | Day, session, search |
@@ -254,6 +255,18 @@ The team sends one link to keynote speakers and attendees: **the domain itself**
 - **Same components:** `Schedule/Public.svelte` reuses the header, time-zones notice, filter bar (`statusFilters={false}`) and day/session/item components. They check `board.readonly` to hide statuses and actions and switch to two columns (time · details). Status filters in a pasted URL are ignored.
 - **No conference yet:** `/` shows "The programme will be published soon" (`Home.svelte`).
 - Still `noindex` (emails are on the page), still `no-store`.
+
+### 3.10 Programme PDF (add-on)
+
+"Save PDF" downloads `GET /programme.pdf` (`spp-online-conference-2026-programme.pdf`): the read-only programme of the newest conference, designed for A4 paper.
+
+- **Engine: dompdf** (`barryvdh/laravel-dompdf`), pure PHP. Nothing to install on the server (no Node, no Chromium), about 1 second per download, about 70 KB per file. Headless Chrome was rejected: pixel-perfect, but it needs Node + Chromium (~300 MB) and a lot of RAM per render on the VPS.
+- **Its own template** (`resources/views/pdf/programme.blade.php` + `pdf/partials/`), because dompdf only understands simple CSS (tables, blocks; no Tailwind, flex or grid), and a layout made for paper reads better than a printed web page anyway.
+- **Layout:** a slim navy masthead with the logo and "Conference programme" on page 1 only; conference title, dates and the time-zones note; then each day (Day 2 starts on a new page) with its Cairo/Prague span and UTC offsets; sessions with a coloured top rule (journal blue, plenary green), session number, journal, title and both moderators; talks as striped rows: Cairo and Prague time, label, speaker, role · affiliation, topic in serif, emails. "Topic TBD" keeps the yellow highlight, missing moderators read "To be announced".
+- **Footer on every page:** "{conference} · Programme" and "Page X of Y" (drawn by dompdf's canvas after rendering).
+- **Page breaks without ugly gaps:** a talk row never splits across pages, and a session header always stays with its first talk. Margins come from `@page` (a global `* { margin: 0 }` reset must not be used: dompdf applies it to the page and the margins disappear).
+- **Fonts:** Inter and Source Serif 4 as static TTFs in `resources/fonts/` (full character sets, e.g. "Šárka"); dompdf embeds only the glyphs used. Its font cache lives in `storage/fonts/` (must be writable).
+- **Same privacy as `/`:** no statuses, notes or editor names; throttled to 10 downloads per minute per IP.
 
 ---
 
@@ -392,6 +405,7 @@ middleware and `throttle:60,1`; saving the name uses `throttle:20,1`.
 | Method | URI | Controller | Purpose | Phase |
 |---|---|---|---|---|
 | GET | `/` | `ScheduleController@public` | Read-only programme of the newest conference (`Home` "published soon" page when there is none) | ✅ add-on |
+| GET | `/programme.pdf` | `ProgrammePdfController` | Read-only programme as an A4 PDF download (`throttle:10,1`) | ✅ add-on |
 | GET | `/s/{conference:access_token}` | `ScheduleController@show` | The team board (editing) | ✅ 2 |
 | POST | `/s/{token}/editor` | `EditorController@store` | Save editor name (cookie) | ✅ 4 |
 | DELETE | `/s/{token}/editor` | `EditorController@destroy` | Forget the name on this device | ✅ 7 |
@@ -429,6 +443,8 @@ one conference can never reach another conference's rows. A test covers this.
 resources/
   css/app.css                         Tailwind v4 + @theme tokens + fonts
   views/app.blade.php                 Inertia root (@vite, @inertiaHead, @inertia, noindex)
+  views/pdf/programme.blade.php       programme PDF (dompdf) + partials/item, partials/time
+  fonts/                              Inter + Source Serif 4 TTFs for the PDF
   js/
     app.ts                            createInertiaApp (pages resolved from ./pages)
     types/models.ts                   shared types
@@ -480,6 +496,7 @@ resources/
 | JS | `@lucide/svelte` | latest | The few icons we use |
 | JS | `@fontsource-variable/inter`, `@fontsource-variable/source-serif-4` | ^5.3 | Self-hosted fonts |
 | JS (dev) | `vitest` | ^5 | Unit tests |
+| PHP | `barryvdh/laravel-dompdf` | ^3.1 | Programme PDF (pure PHP) |
 
 ---
 
@@ -506,7 +523,7 @@ resources/
 
 **Test strategy (no more than needed):**
 
-- **Feature tests (PHPUnit, 47):** board loads with a valid token and returns 404 for a wrong one; the home page shows the newest conference read-only without statuses, notes, `updated_by` or the team link, can't write, and falls back to "published soon"; noindex/referrer meta and security headers; Cairo/Prague conversion across the clock change; item ordering; notes order; seeder counts, corrections and idempotency; link command and token rotation; editor name cookie, validation and resetting it; writes without a name rejected; status persistence with `updated_by`; notes create/delete/validation; session and item create/update/delete, validation, type rules, stale guard; one conference can't read or change another's rows.
+- **Feature tests (PHPUnit, 50):** the programme PDF downloads, contains the programme ("Topic TBD", "To be announced") but no notes, editor names or statuses, and is a 404 without a conference; board loads with a valid token and returns 404 for a wrong one; the home page shows the newest conference read-only without statuses, notes, `updated_by` or the team link, can't write, and falls back to "published soon"; noindex/referrer meta and security headers; Cairo/Prague conversion across the clock change; item ordering; notes order; seeder counts, corrections and idempotency; link command and token rotation; editor name cookie, validation and resetting it; writes without a name rejected; status persistence with `updated_by`; notes create/delete/validation; session and item create/update/delete, validation, type rules, stale guard; one conference can't read or change another's rows.
 - **Unit tests (Vitest, 29):** derived flags, summary counts, date/offset/relative-time formatting, time shifting, accent-insensitive search and highlighting, filter combinations, URL round-trip and validation, session labels.
 - **Browser check:** a throwaway script drives headless Edge over the DevTools protocol through the main flows (status change with the name prompt, notes, stale edit, drawers, search, summary shortcut, copy email, forget name, print media, mobile at 390 px) and fails on console errors.
 
@@ -537,27 +554,75 @@ DB_PASSWORD=…
 SESSION_SECURE_COOKIE=true            # session and editor-name cookies only over HTTPS
 ```
 
-**Shared hosting (cPanel or similar)**
+### 5.3 Production: CloudPanel VPS + auto-deploy from GitHub
 
-1. On your machine: `composer install --no-dev --optimize-autoloader` and `npm ci && npm run build` (shared hosts usually have no Node; the result is `public/build`).
-2. Upload the project **outside** `public_html` (e.g. `~/spp-manager`), including `vendor/` and `public/build/`, but not `node_modules/`, `.env` or `tests/`.
-3. Point the (sub)domain's **document root to `~/spp-manager/public`**. If the host doesn't allow that, replace `public_html` with a symlink to it (`ln -s ~/spp-manager/public ~/public_html`). Never expose the project root: it contains `.env`.
-4. Create the database and user in the hosting panel; write `.env`.
-5. Over SSH (or the host's terminal), in the project folder:
+Every push to `main` runs `.github/workflows/deploy.yml`:
+
+```mermaid
+flowchart LR
+    push["git push main"] --> test["GitHub Actions: test job"]
+    test -->|"pint, svelte-check, Vitest, build, PHPUnit on MySQL 8"| ok{"All green?"}
+    ok -->|no| stop["Stop. Server untouched"]
+    ok -->|yes| deploy["deploy job over SSH"]
+    deploy --> pull["git reset --hard origin/main"]
+    pull --> script["scripts/deploy.sh: composer install --no-dev, migrate --force, optimize"]
+    script --> assets["rsync public/build built by CI"]
+```
+
+- The server never needs Node: assets are built once in CI and uploaded.
+- `.env`, `storage/` (logs, sessions, font cache) and the database are never touched by a deploy. Anything edited by hand in tracked files on the server is overwritten.
+- It can also be started by hand: GitHub → Actions → "Test and deploy" → Run workflow.
+
+**One-time server setup (CloudPanel)**
+
+1. **Site** (already created, with the database and SSL): in the site's settings set **Root Directory** to `htdocs/<domain>/public` and the **PHP version** to 8.3 (8.2+ works).
+2. **SSH as the site user** (CloudPanel → Site → SSH/FTP → add your SSH key). All commands below run as that user.
+3. **Let the server read the private repo** with a read-only deploy key:
 
    ```bash
+   ssh-keygen -t ed25519 -f ~/.ssh/github_deploy -N "" -C "spp-server"
+   printf "Host github.com\n  IdentityFile ~/.ssh/github_deploy\n  IdentitiesOnly yes\n" >> ~/.ssh/config
+   cat ~/.ssh/github_deploy.pub   # GitHub → repo → Settings → Deploy keys → Add (read-only)
+   ssh -T git@github.com          # answer "yes" once
+   ```
+
+4. **Clone** into the site folder (CloudPanel puts a placeholder there; it must be empty):
+
+   ```bash
+   cd ~/htdocs && rm -rf <domain> && git clone git@github.com:amradawii/spp-conference-manager.git <domain>
+   cd <domain> && cp .env.example .env && nano .env   # production values above + the CloudPanel database
+   composer install --no-dev --optimize-autoloader
    php artisan key:generate      # once, on the first deploy only
    php artisan migrate --force
    php artisan db:seed --force   # seeds the PDF programme; safe to re-run, it skips an existing conference
-   php artisan optimize          # caches config, routes, views
-   php artisan conference:link   # prints the team link (editing) and the read-only link (the domain)
+   php artisan optimize
+   php artisan conference:link   # team link (editing) + read-only link (the domain)
    ```
 
-6. Make `storage/` and `bootstrap/cache/` writable by PHP. Enable the host's free SSL (AutoSSL / Let's Encrypt).
+   If `php -v` shows a different version than the site's, use the versioned binary (e.g. `php8.3`) and set the `PHP_BIN` secret below.
 
-**VPS (Nginx + PHP-FPM):** same steps, with the Nginx `root` set to `/var/www/spp-manager/public`, the standard Laravel `try_files $uri $uri/ /index.php?$query_string;` block, and HTTPS from Certbot. Node can be installed to build on the server, but building locally works the same.
+5. **Let GitHub Actions log in:** create a second key pair just for deployments (on your PC is fine), add its public key to the site user's `~/.ssh/authorized_keys`, and keep the private key for the next step:
 
-**Updating after launch:** upload the changed files and the new `public/build`, then `php artisan migrate --force && php artisan optimize`. **Never** run `migrate:fresh` or `key:generate` on production: the first wipes every status and note (and changes the link), the second signs everyone out and forgets all names. Use the host's daily database backup, or a `mysqldump` before each update.
+   ```bash
+   ssh-keygen -t ed25519 -f gha_deploy -N "" -C "github-actions"
+   ```
+
+6. **GitHub → repo → Settings → Secrets and variables → Actions → New repository secret:**
+
+   | Secret | Example |
+   |---|---|
+   | `SSH_HOST` | `203.0.113.10` (the VPS IP) |
+   | `SSH_USER` | the CloudPanel site user |
+   | `SSH_PRIVATE_KEY` | contents of `gha_deploy` (the private key) |
+   | `APP_PATH` | `/home/<site-user>/htdocs/<domain>` |
+   | `SSH_PORT` | optional, default `22` |
+   | `PHP_BIN` | optional, e.g. `php8.3`, default `php` |
+
+7. **First deploy:** Actions → "Test and deploy" → Run workflow (this also uploads `public/build` for the first time). After that, every `git push` to `main` updates the server in about 2 minutes, only if all tests pass.
+
+**Rules for production:** **never** run `migrate:fresh` or `key:generate` there: the first wipes every status and note (and changes the team link), the second signs everyone out and forgets all names. Schema changes go through new migrations, which the deploy runs automatically. Turn on CloudPanel's database backups (or `mysqldump` before risky changes).
+
+**Shared hosting instead (no SSH deploys):** build locally (`composer install --no-dev -o`, `npm run build`), upload everything except `node_modules`, `.env` and `tests` outside `public_html`, point the document root at `public/`, then run the same `artisan` commands as in step 4.
 
 ---
 
@@ -673,7 +738,7 @@ Each phase ends in a working, testable state.
 - [x] "Reset my name" on the device (`DELETE editor`)
 - [x] Accessibility pass: skip link, contrast of muted text, labelled icon buttons, focus rings
 - [x] Security headers; board responses not cached
-- [x] Print stylesheet (`print:` variants) + "Print" button: a clean PDF can still be produced from the browser
+- [x] Print stylesheet (`print:` variants) + "Print" button: a clean PDF can still be produced from the browser (the button was later replaced by "Save PDF", section 3.10)
 - [x] Deployment guide (section 5.2)
 - [ ] Mobile pass on a real phone via the WhatsApp in-app browser (team)
 - [ ] Deploy, run `conference:link`, share the team link in the team group and the domain with speakers and attendees (team)
@@ -684,11 +749,22 @@ Each phase ends in a working, testable state.
 
 - [x] `/` renders the newest conference read-only (`ScheduleController@public`); "published soon" page when there is none
 - [x] Resources drop statuses, notes, `updated_by`/`updated_at`, team URL and `public_url` on the public route
-- [x] `Schedule/Public.svelte`: header ("Conference programme", Print), time zones, day/session/search filters, programme without statuses or actions, plain email links, "To be announced" for missing moderators
+- [x] `Schedule/Public.svelte`: header ("Conference programme", Save PDF), time zones, day/session/search filters, programme without statuses or actions, plain email links, "To be announced" for missing moderators
 - [x] "Copy read-only link" in the team header; `conference:link` prints both links
 - [x] Tests: programme shown, nothing internal leaks, no writes, empty-database fallback, security headers
 
 **Done when:** speakers and attendees open the domain and see the current programme, always up to date.
+
+### Add-on: Programme PDF and auto-deploy ✅
+
+- [x] `GET /programme.pdf` with dompdf: dedicated A4 template, minimal masthead, page numbers, embedded Inter + Source Serif 4 (section 3.10)
+- [x] "Save PDF" replaces "Print" on the team and read-only pages
+- [x] Browser print: session cards lose their borders on paper, so no empty boxes at page bottoms
+- [x] GitHub Actions: tests on MySQL 8, then deploy over SSH (`scripts/deploy.sh` + uploaded `public/build`)
+- [x] CloudPanel first-time setup guide (section 5.3)
+- [ ] One-time server setup and GitHub secrets (team)
+
+**Done when:** a push to `main` updates the live site, and the PDF is what gets shared instead of the drafts.
 
 ---
 
@@ -721,3 +797,5 @@ Each phase ends in a working, testable state.
 | 2026-10-17 | Summary label "At risk" renamed "Warning"; "Forget my name" renamed "Reset my name" |
 | 2026-10-18 | Read-only programme on the domain root instead of a second secret token: short, permanent link for speakers and attendees; the team link is for editing only. The "This schedule is private" page is gone (kept only as "published soon" when no conference exists) |
 | 2026-10-18 | Read-only view hides statuses, status filters, notes, editing and the summary; keeps time zones, day/session/search filters and emails (already public in the shared PDF), shown as plain links |
+| 2026-10-18 | "Save PDF" (server-made, dompdf) replaces "Print": the same polished file for everyone, independent of browser print settings. dompdf over headless Chrome: pure PHP, nothing extra on the VPS, fast enough for ~10 pages; its simpler CSS is handled by a dedicated table-based template |
+| 2026-10-18 | Auto-deploy with GitHub Actions: tests must pass before anything reaches the server; assets are built in CI, so the server needs no Node; `git reset --hard` + `migrate --force` + `optimize` on each push |

@@ -20,6 +20,7 @@ class ConferenceResource extends JsonResource
             'id' => $this->id,
             'name' => $this->name,
             'url' => $team ? route('schedule.show', $this->resource, absolute: false) : route('schedule.public', absolute: false),
+            'pdf_url' => route('schedule.pdf', absolute: false),
             $this->mergeWhen($team, fn () => [
                 'public_url' => route('schedule.public'),
             ]),

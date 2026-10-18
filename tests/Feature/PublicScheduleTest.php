@@ -71,6 +71,42 @@ class PublicScheduleTest extends TestCase
             ->assertInertia(fn (Assert $page) => $page->component('Home')->missing('conference'));
     }
 
+    public function test_programme_downloads_as_a_pdf(): void
+    {
+        $item = AgendaItem::factory()->create();
+        $conference = $item->conferenceSession->day->conference;
+        $conference->update(['name' => 'SPP Online Conference 2026']);
+
+        $response = $this->get(route('schedule.pdf'));
+
+        $response->assertOk()
+            ->assertHeader('Content-Type', 'application/pdf')
+            ->assertDownload('spp-online-conference-2026-programme.pdf');
+        $this->assertStringStartsWith('%PDF-', $response->getContent());
+    }
+
+    public function test_pdf_shows_the_programme_without_internal_details(): void
+    {
+        $item = AgendaItem::factory()->create(['speaker_name' => 'Prof. Nader Shahata', 'title' => null, 'updated_by' => 'Noha']);
+        $item->conferenceSession->forceFill(['kind' => 'session', 'number' => 1, 'journal_moderator' => null])->save();
+        Note::factory()->create(['notable_id' => $item->id, 'body' => 'Internal reminder']);
+        $conference = Conference::with('days.sessions.items')->first();
+
+        $html = view('pdf.programme', ['conference' => $conference])->render();
+
+        $this->assertStringContainsString('Prof. Nader Shahata', $html);
+        $this->assertStringContainsString('Topic TBD', $html);
+        $this->assertStringContainsString('To be announced', $html);
+        $this->assertStringNotContainsString('Internal reminder', $html);
+        $this->assertStringNotContainsString('Noha', $html);
+        $this->assertStringNotContainsString('Pending', $html);
+    }
+
+    public function test_pdf_is_not_found_when_there_is_no_conference(): void
+    {
+        $this->get(route('schedule.pdf'))->assertNotFound();
+    }
+
     public function test_home_page_is_not_framed_cached_or_indexed(): void
     {
         Conference::factory()->create();

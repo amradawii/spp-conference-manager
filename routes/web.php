@@ -5,10 +5,12 @@ use App\Http\Controllers\AgendaItemStatusController;
 use App\Http\Controllers\ConferenceSessionController;
 use App\Http\Controllers\EditorController;
 use App\Http\Controllers\NoteController;
+use App\Http\Controllers\ProgrammePdfController;
 use App\Http\Controllers\ScheduleController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [ScheduleController::class, 'public'])->name('schedule.public');
+Route::get('programme.pdf', ProgrammePdfController::class)->middleware('throttle:10,1')->name('schedule.pdf');
 
 Route::prefix('s/{conference:access_token}')->scopeBindings()->group(function () {
     Route::get('/', [ScheduleController::class, 'show'])->name('schedule.show');

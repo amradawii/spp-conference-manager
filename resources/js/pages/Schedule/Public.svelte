@@ -66,14 +66,14 @@
 </svelte:head>
 
 {#snippet headerActions()}
-    <button
-        type="button"
-        onclick={() => window.print()}
-        class="hidden rounded-md px-2 py-1 text-xs font-medium text-white ring-1 ring-white/20 transition-colors hover:bg-white/10 md:inline-flex print:hidden"
-        title="Print or save as PDF (shows the current filters)"
+    <a
+        href={conference.pdf_url}
+        download
+        class="rounded-md px-2.5 py-1 text-xs font-medium text-white ring-1 ring-white/20 transition-colors hover:bg-white/10 print:hidden"
+        title="Download the programme as a PDF"
     >
-        Print
-    </button>
+        Save PDF
+    </a>
 {/snippet}
 
 <a

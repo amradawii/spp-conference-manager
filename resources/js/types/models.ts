@@ -68,6 +68,8 @@ export interface Conference {
     name: string;
     /** Relative URL of the board: "/s/{token}" for the team (all write routes hang off it), "/" for the read-only programme. */
     url: string;
+    /** The read-only programme as a downloadable PDF. */
+    pdf_url: string;
     /** Absolute URL of the read-only programme. Team board only. */
     public_url?: string;
     cities: { conference: string; team: string };

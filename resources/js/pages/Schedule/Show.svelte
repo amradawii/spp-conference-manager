@@ -170,14 +170,14 @@
         >
             <span class="hidden sm:inline">Copy</span> read-only link
         </button>
-        <button
-            type="button"
-            onclick={() => window.print()}
+        <a
+            href={conference.pdf_url}
+            download
             class="hidden rounded-md px-2 py-1 font-medium text-ink-200 transition-colors hover:bg-white/10 hover:text-white md:inline-flex"
-            title="Print or save as PDF (shows the current filters)"
+            title="Download the read-only programme as a PDF"
         >
-            Print
-        </button>
+            Save PDF
+        </a>
         <button
             type="button"
             onclick={refresh}

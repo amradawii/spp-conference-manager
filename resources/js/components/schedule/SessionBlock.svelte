@@ -22,12 +22,12 @@
 
 <article
     id="session-{session.id}"
-    class="overflow-hidden rounded-xl border border-line bg-white shadow-[0_1px_2px_rgba(11,20,38,0.04)] print:shadow-none"
+    class="overflow-hidden rounded-xl border border-line bg-white shadow-[0_1px_2px_rgba(11,20,38,0.04)] print:overflow-visible print:rounded-none print:border-x-0 print:border-t-0 print:bg-transparent print:shadow-none"
 >
     <header
-        class="grid gap-3 px-5 py-5 sm:px-6 md:gap-6 print:break-inside-avoid print:gap-6 print:break-after-avoid {rowColumns(board.readonly)} {isSession
-            ? 'bg-journal/[0.035]'
-            : 'bg-ink-50/60'}"
+        class="grid gap-3 px-5 py-5 sm:px-6 md:gap-6 print:break-inside-avoid print:gap-6 print:break-after-avoid print:border-t-2 {rowColumns(board.readonly)} {isSession
+            ? 'bg-journal/[0.035] print:border-journal'
+            : 'bg-ink-50/60 print:border-brand-700'}"
     >
         <div class="md:pt-0.5">
             <TimeRange time={session.time} cities={board.cities} />
