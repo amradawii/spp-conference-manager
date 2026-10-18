@@ -1,59 +1,59 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# SPP Conference Manager
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+A shared schedule board for the **Science Park Publisher (SPP) Online Conference**, 24–25 October 2026.
+It replaces the PDF drafts that were edited and re-posted after every change: the team keeps one live schedule, and speakers and attendees always see the current programme.
 
-## About Laravel
+## Features
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+**Public programme** (the domain root)
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+- Full two-day programme with every time shown in Cairo and Prague, including the 25 October clock change
+- Filter by day or session, and search by speaker, topic, journal or moderator
+- **Save PDF**: a clean A4 programme with page numbers, generated on the server
+- No statuses, notes or internal details
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+**Team board** (private link)
 
-## Learning Laravel
+- Speaker confirmation and assets status in one or two clicks
+- Moderators, notes, and add / edit / remove sessions and talks
+- Every change shows who made it and when; the editor's name is remembered per device
+- Summary counters and filters for what still needs work (pending, warning, not attending)
+- "Copy read-only link" to share the public programme
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+There are no accounts: the team link is a secret URL, and only that link can edit.
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+## Tech stack
 
-## Laravel Sponsors
+Laravel 12 · Inertia v3 · Svelte 5 · TypeScript · Tailwind CSS v4 · MySQL 8 · dompdf
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+## Local setup
 
-### Premium Partners
+Requirements: PHP 8.2+, Composer, Node 22+, MySQL 8 (or MariaDB 10.11+).
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+```bash
+composer setup                 # install, .env, app key, migrate, build
+php artisan db:seed            # the SPP 2026 programme
+php artisan conference:link    # prints the team link and the public link
+composer dev                   # http://127.0.0.1:8000
+```
 
-## Contributing
+Set the `DB_*` values in `.env` before `composer setup`. Tests use a separate `schedule_app_test` database.
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+## Tests
 
-## Code of Conduct
+```bash
+php artisan test        # feature tests (PHPUnit)
+npm test                # unit tests (Vitest)
+npm run check           # type check (svelte-check)
+vendor/bin/pint --test  # code style
+```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+## Deployment
 
-## Security Vulnerabilities
+Every push to `main` runs the tests on GitHub Actions and, if they pass, deploys to the server over SSH (`.github/workflows/deploy.yml`, `scripts/deploy.sh`). The server only needs PHP and MySQL; assets are built in CI.
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+First-time server setup (CloudPanel), required secrets and production rules are in [docs/system-design.md](docs/system-design.md#53-production-cloudpanel-vps--auto-deploy-from-github).
 
-## License
+## Documentation
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+[docs/system-design.md](docs/system-design.md) covers the goals, UX, data model, architecture, decisions and implementation phases.
