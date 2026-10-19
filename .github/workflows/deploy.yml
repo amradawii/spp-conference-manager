@@ -29,6 +29,9 @@ jobs:
       DB_PORT: 3306
       DB_USERNAME: root
       DB_PASSWORD: password
+      LARAVEL_BYPASS_ENV_CHECK: 1
+
+
 
     steps:
       - uses: actions/checkout@v4
