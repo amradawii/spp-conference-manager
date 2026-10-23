@@ -8,10 +8,8 @@ export interface Summary {
     assetsReady: number;
     atRisk: number;
     topicsTbd: number;
-    sessionsMissingModerator: number;
+    sessionsMissingChair: number;
 }
-
-export type MissingModerator = 'spp' | 'journal';
 
 export function hasSpeaker(item: AgendaItem): boolean {
     return item.type !== 'segment';
@@ -35,16 +33,9 @@ export function isTopicTbd(item: AgendaItem): boolean {
     return hasSpeaker(item) && !item.title?.trim();
 }
 
-export function missingModerators(session: ConferenceSession): MissingModerator[] {
-    if (session.kind !== 'session') {
-        return [];
-    }
-
-    const missing: MissingModerator[] = [];
-    if (!session.spp_moderator?.trim()) missing.push('spp');
-    if (!session.journal_moderator?.trim()) missing.push('journal');
-
-    return missing;
+/** Numbered sessions need a chair; plenary blocks and co-chairs are optional. */
+export function isMissingChair(session: ConferenceSession): boolean {
+    return session.kind === 'session' && !session.chair?.trim();
 }
 
 export function summarize(days: Day[]): Summary {
@@ -61,6 +52,6 @@ export function summarize(days: Day[]): Summary {
         assetsReady: tracked.filter((item) => item.assets_status === 'ready').length,
         atRisk: items.filter(isAtRisk).length,
         topicsTbd: items.filter(isTopicTbd).length,
-        sessionsMissingModerator: sessions.filter((session) => missingModerators(session).length > 0).length,
+        sessionsMissingChair: sessions.filter(isMissingChair).length,
     };
 }

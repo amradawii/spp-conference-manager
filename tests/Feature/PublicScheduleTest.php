@@ -28,7 +28,8 @@ class PublicScheduleTest extends TestCase
                 ->where('conference.name', $conference->name)
                 ->where('conference.url', '/')
                 ->where('conference.days.0.sessions.0.items.0.emails', ['new@example.com'])
-                ->has('conference.days.0.sessions.0.spp_moderator'));
+                ->has('conference.days.0.sessions.0.chair')
+                ->has('conference.days.0.zoom_url'));
     }
 
     public function test_home_page_hides_the_team_link_and_internal_fields(): void
@@ -75,20 +76,20 @@ class PublicScheduleTest extends TestCase
     {
         $item = AgendaItem::factory()->create();
         $conference = $item->conferenceSession->day->conference;
-        $conference->update(['name' => 'SPP Online Conference 2026']);
+        $conference->update(['name' => 'The International Conference for Science Park Publisher (ICSPP-2026)']);
 
         $response = $this->get(route('schedule.pdf'));
 
         $response->assertOk()
             ->assertHeader('Content-Type', 'application/pdf')
-            ->assertDownload('spp-online-conference-2026-programme.pdf');
+            ->assertDownload('icspp-2026-programme.pdf');
         $this->assertStringStartsWith('%PDF-', $response->getContent());
     }
 
     public function test_pdf_shows_the_programme_without_internal_details(): void
     {
         $item = AgendaItem::factory()->create(['speaker_name' => 'Prof. Nader Shahata', 'title' => null, 'updated_by' => 'Noha']);
-        $item->conferenceSession->forceFill(['kind' => 'session', 'number' => 1, 'journal_moderator' => null])->save();
+        $item->conferenceSession->forceFill(['kind' => 'session', 'number' => 1, 'chair' => null])->save();
         Note::factory()->create(['notable_id' => $item->id, 'body' => 'Internal reminder']);
         $conference = Conference::with('days.sessions.items')->first();
 

@@ -35,8 +35,8 @@ class ScheduleEditingTest extends TestCase
             'title' => 'Testing in Practice',
             'starts_at' => '16:30',
             'ends_at' => '17:30',
-            'spp_moderator' => 'Sara Ayman',
-            'journal_moderator' => null,
+            'chair' => 'Dr. Ahmed Sharf',
+            'co_chair' => null,
             ...$overrides,
         ];
     }
@@ -110,29 +110,29 @@ class ScheduleEditingTest extends TestCase
         $session = ConferenceSession::factory()->create();
 
         $this->put(route('sessions.update', [$session->day->conference, $session]), [
-            ...$this->sessionPayload(['journal_moderator' => 'Prof. Magda EL-Massik']),
+            ...$this->sessionPayload(['co_chair' => 'Prof. Magda EL-Massik']),
             'expected_updated_at' => $session->updated_at->toIso8601String(),
         ])->assertSessionHasNoErrors();
 
         $session->refresh();
-        $this->assertSame('Prof. Magda EL-Massik', $session->journal_moderator);
+        $this->assertSame('Prof. Magda EL-Massik', $session->co_chair);
         $this->assertSame('Yomna', $session->updated_by);
     }
 
     public function test_an_outdated_session_form_does_not_overwrite_newer_changes(): void
     {
-        $session = ConferenceSession::factory()->create(['spp_moderator' => 'Sara Ayman']);
+        $session = ConferenceSession::factory()->create(['chair' => 'Prof. Nader Shahata']);
         $openedAt = $session->updated_at->toIso8601String();
 
         Date::setTestNow(now()->addMinute());
-        $session->update(['spp_moderator' => 'Noha Atef', 'updated_by' => 'Noha']);
+        $session->update(['chair' => 'Prof. Kamal Alameh', 'updated_by' => 'Noha']);
 
         $this->put(route('sessions.update', [$session->day->conference, $session]), [
-            ...$this->sessionPayload(['spp_moderator' => 'Rania Adel']),
+            ...$this->sessionPayload(['chair' => 'Prof. Nour F. Attia']),
             'expected_updated_at' => $openedAt,
         ])->assertSessionHasErrors('stale');
 
-        $this->assertSame('Noha Atef', $session->fresh()->spp_moderator);
+        $this->assertSame('Prof. Kamal Alameh', $session->fresh()->chair);
     }
 
     public function test_deleting_a_session_removes_its_items_and_all_their_notes(): void

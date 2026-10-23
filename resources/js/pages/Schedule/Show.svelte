@@ -18,6 +18,7 @@
     import { createRoutes } from '@/lib/routes';
     import { summarize } from '@/lib/stats';
     import { toasts } from '@/lib/toasts.svelte';
+    import { eventLogo } from '@/lib/ui';
     import type { Conference } from '@/types/models';
     import { router } from '@inertiajs/svelte';
 
@@ -212,7 +213,7 @@
     Skip to schedule
 </a>
 
-<AppHeader title={conference.name} {subtitle} actions={headerActions} />
+<AppHeader title={conference.name} {subtitle} logo={eventLogo} actions={headerActions} />
 
 <main class="mx-auto max-w-7xl px-4 pb-24 sm:px-6 print:pb-0">
     <div class="relative -mt-10 space-y-4">

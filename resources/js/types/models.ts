@@ -42,8 +42,8 @@ export interface ConferenceSession {
     journal: string | null;
     title: string | null;
     time: TimeRange;
-    spp_moderator: string | null;
-    journal_moderator: string | null;
+    chair: string | null;
+    co_chair: string | null;
     updated_by: string | null;
     updated_at: string;
     items: AgendaItem[];
@@ -54,6 +54,8 @@ export interface Day {
     id: number;
     date: string;
     title: string;
+    zoom_url: string | null;
+    note: string | null;
     time: TimeRange | null;
     utc_offsets: { conference: string; team: string };
     sessions: ConferenceSession[];

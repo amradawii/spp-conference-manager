@@ -1,9 +1,9 @@
 import type { AgendaItem, ConferenceSession, Day, SpeakerStatus } from '@/types/models';
 import { normalize } from './search';
-import { hasSpeaker, isAtRisk, isTopicTbd, missingModerators, tracksAssets } from './stats';
+import { hasSpeaker, isAtRisk, isMissingChair, isTopicTbd, tracksAssets } from './stats';
 
 export type AssetsFilter = 'pending' | 'ready';
-export type FlagFilter = 'at_risk' | 'topic_tbd' | 'missing_moderator';
+export type FlagFilter = 'at_risk' | 'topic_tbd' | 'missing_chair';
 
 export interface Filters {
     /** 1-based day number. */
@@ -17,12 +17,12 @@ export interface Filters {
 
 export const speakerFilterValues: SpeakerStatus[] = ['pending', 'confirmed', 'not_attending'];
 export const assetsFilterValues: AssetsFilter[] = ['pending', 'ready'];
-export const flagFilterValues: FlagFilter[] = ['at_risk', 'topic_tbd', 'missing_moderator'];
+export const flagFilterValues: FlagFilter[] = ['at_risk', 'topic_tbd', 'missing_chair'];
 
 export const flagLabels: Record<FlagFilter, string> = {
     at_risk: 'Warning',
     topic_tbd: 'Topic TBD',
-    missing_moderator: 'Missing moderator',
+    missing_chair: 'Missing chair',
 };
 
 export function emptyFilters(): Filters {
@@ -96,7 +96,7 @@ function includesQuery(values: (string | null | undefined)[], query: string): bo
 }
 
 function sessionMatchesQuery(session: ConferenceSession, query: string): boolean {
-    return includesQuery([session.journal, session.title, session.spp_moderator, session.journal_moderator], query);
+    return includesQuery([session.journal, session.title, session.chair, session.co_chair], query);
 }
 
 function itemMatchesQuery(item: AgendaItem, query: string): boolean {
@@ -114,8 +114,8 @@ function itemPassesStatusFilters(item: AgendaItem, filters: Filters): boolean {
 
 /**
  * The visible programme. A search that matches a session itself (journal,
- * title or a moderator) keeps the whole session, so searching "Sara" lists
- * every session she moderates.
+ * title or a chair) keeps the whole session, so searching "Sharf" lists
+ * every session he chairs.
  */
 export function applyFilters(days: Day[], filters: Filters): Day[] {
     const query = normalize(filters.q.trim());
@@ -125,7 +125,7 @@ export function applyFilters(days: Day[], filters: Filters): Day[] {
         .map((day) => ({
             ...day,
             sessions: day.sessions.flatMap((session) => {
-                if (filters.flag === 'missing_moderator' && missingModerators(session).length === 0) return [];
+                if (filters.flag === 'missing_chair' && !isMissingChair(session)) return [];
                 if (!narrowsItems) return [session];
 
                 const sessionHit = query !== '' && sessionMatchesQuery(session, query);

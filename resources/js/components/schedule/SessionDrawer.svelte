@@ -32,8 +32,8 @@
         title: session?.title ?? '',
         starts_at: session?.time.start ?? day.sessions.at(-1)?.time.end ?? '',
         ends_at: session?.time.end ?? '',
-        spp_moderator: session?.spp_moderator ?? '',
-        journal_moderator: session?.journal_moderator ?? '',
+        chair: session?.chair ?? '',
+        co_chair: session?.co_chair ?? '',
     }));
 
     const errors = $derived(form.errors as Record<string, string | undefined>);
@@ -96,7 +96,7 @@
         <fieldset>
             <legend class="text-sm font-medium text-ink-800">Type</legend>
             <div class="mt-1.5 grid grid-cols-2 gap-2">
-                {#each [{ value: 'session', label: 'Journal session', hint: 'Numbered, with moderators' }, { value: 'ceremony', label: 'Plenary', hint: 'Opening, closing, ceremony' }] as option (option.value)}
+                {#each [{ value: 'session', label: 'Journal session', hint: 'Numbered, with a chair' }, { value: 'ceremony', label: 'Plenary', hint: 'Opening, closing, ceremony' }] as option (option.value)}
                     <label
                         class="cursor-pointer rounded-lg px-3 py-2.5 ring-1 ring-inset transition-colors {form.kind === option.value
                             ? 'bg-ink-50 ring-ink-700'
@@ -116,7 +116,7 @@
                     <input id="session-number" type="number" min="1" max="99" bind:value={form.number} class={inputClass} />
                 </FormField>
             {/if}
-            <FormField label="Journal" for="session-journal" error={errors.journal} optional={form.kind === 'ceremony'}>
+            <FormField label="Journal title" for="session-journal" error={errors.journal} optional>
                 <input
                     id="session-journal"
                     bind:value={form.journal}
@@ -132,7 +132,7 @@
             for="session-title"
             error={errors.title}
             optional={!!form.journal.trim()}
-            hint={form.kind === 'ceremony' ? 'e.g. Opening Ceremony' : 'Shown under the journal name'}
+            hint={form.kind === 'ceremony' ? 'e.g. Closing Ceremony' : 'e.g. Carbon Capture and Carbon Footprint'}
         >
             <input id="session-title" bind:value={form.title} class={inputClass} maxlength="255" />
         </FormField>
@@ -155,16 +155,14 @@
             </p>
         </div>
 
-        {#if form.kind === 'session'}
-            <div class="grid gap-4 sm:grid-cols-2">
-                <FormField label="SPP moderator" for="session-spp" error={errors.spp_moderator} optional>
-                    <input id="session-spp" bind:value={form.spp_moderator} class={inputClass} maxlength="255" />
-                </FormField>
-                <FormField label="Journal moderator" for="session-journal-moderator" error={errors.journal_moderator} optional>
-                    <input id="session-journal-moderator" bind:value={form.journal_moderator} class={inputClass} maxlength="255" />
-                </FormField>
-            </div>
-        {/if}
+        <div class="grid gap-4 sm:grid-cols-2">
+            <FormField label="Session chair" for="session-chair" error={errors.chair} optional>
+                <input id="session-chair" bind:value={form.chair} class={inputClass} maxlength="255" />
+            </FormField>
+            <FormField label="Session co-chair" for="session-co-chair" error={errors.co_chair} optional>
+                <input id="session-co-chair" bind:value={form.co_chair} class={inputClass} maxlength="255" />
+            </FormField>
+        </div>
     </form>
 
     {#snippet footer()}

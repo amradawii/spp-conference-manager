@@ -68,12 +68,12 @@
             count: summary.topicsTbd,
         },
         {
-            label: 'Missing moderator',
-            value: String(summary.sessionsMissingModerator),
-            hint: summary.sessionsMissingModerator === 1 ? 'session' : 'sessions',
-            tone: summary.sessionsMissingModerator ? 'pending' : 'neutral',
-            shortcut: { flag: 'missing_moderator' },
-            count: summary.sessionsMissingModerator,
+            label: 'Missing chair',
+            value: String(summary.sessionsMissingChair),
+            hint: summary.sessionsMissingChair === 1 ? 'session' : 'sessions',
+            tone: summary.sessionsMissingChair ? 'pending' : 'neutral',
+            shortcut: { flag: 'missing_chair' },
+            count: summary.sessionsMissingChair,
         },
     ]);
 

@@ -22,8 +22,8 @@ class ConferenceSessionFactory extends Factory
             'title' => fake()->sentence(5),
             'starts_at' => '09:00',
             'ends_at' => '10:30',
-            'spp_moderator' => fake()->name(),
-            'journal_moderator' => null,
+            'chair' => fake()->name(),
+            'co_chair' => null,
         ];
     }
 
@@ -34,7 +34,7 @@ class ConferenceSessionFactory extends Factory
             'number' => null,
             'journal' => null,
             'title' => 'Opening Ceremony',
-            'spp_moderator' => null,
+            'chair' => null,
         ]);
     }
 }

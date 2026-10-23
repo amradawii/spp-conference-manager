@@ -1,4 +1,4 @@
-import type { Day } from '@/types/models';
+import type { Day, TimeRange } from '@/types/models';
 
 const dayFormatter = new Intl.DateTimeFormat('en-GB', { weekday: 'long', day: 'numeric', month: 'long', timeZone: 'UTC' });
 const dayNumberFormatter = new Intl.DateTimeFormat('en-GB', { day: 'numeric', timeZone: 'UTC' });
@@ -52,6 +52,10 @@ export function formatClockRange(start: string, end: string): string {
 }
 
 /** "09:30" shifted by 2 hours → "11:30" (wraps around midnight). */
+export function isSameTimeRange(a: TimeRange | null | undefined, b: TimeRange | null | undefined): boolean {
+    return !!a && !!b && a.start === b.start && a.end === b.end;
+}
+
 export function shiftTime(time: string, hours: number): string {
     const match = /^(\d{1,2}):(\d{2})/.exec(time);
     if (!match) return '';

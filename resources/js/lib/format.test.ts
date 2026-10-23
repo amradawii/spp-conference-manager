@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { formatClock, formatClockRange, formatDateSpan, formatDay, formatRelative, formatUtcOffset, pluralize, shiftTime, teamLeadHours } from './format';
 
 function dayWithOffsets(conference: string, team: string): Day {
-    return { id: 1, date: '2026-10-24', title: '', time: null, utc_offsets: { conference, team }, sessions: [] };
+    return { id: 1, date: '2026-10-24', title: '', zoom_url: null, note: null, time: null, utc_offsets: { conference, team }, sessions: [] };
 }
 
 describe('format', () => {

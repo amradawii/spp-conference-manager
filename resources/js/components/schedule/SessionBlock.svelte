@@ -1,8 +1,8 @@
 <script lang="ts">
     import Highlight from '@/components/ui/Highlight.svelte';
     import { getBoard } from '@/lib/board';
-    import { formatRelative } from '@/lib/format';
-    import { missingModerators } from '@/lib/stats';
+    import { formatRelative, isSameTimeRange } from '@/lib/format';
+    import { isMissingChair } from '@/lib/stats';
     import { rowColumns } from '@/lib/ui';
     import type { ConferenceSession } from '@/types/models';
     import AgendaItemRow from './AgendaItemRow.svelte';
@@ -13,11 +13,14 @@
 
     const board = getBoard();
     const isSession = $derived(session.kind === 'session');
-    const missing = $derived(missingModerators(session));
-    const moderators = $derived([
-        { label: 'SPP moderator', tone: 'text-spp', name: session.spp_moderator, missing: missing.includes('spp') },
-        { label: 'Journal moderator', tone: 'text-journal', name: session.journal_moderator, missing: missing.includes('journal') },
-    ]);
+    const heading = $derived(session.title ?? session.journal ?? '');
+    const roles = $derived(
+        [
+            { label: 'Session Chair', name: session.chair, missing: isMissingChair(session), journal: false },
+            { label: 'Session Co-Chair', name: session.co_chair, missing: false, journal: false },
+            { label: 'Journal Title', name: session.title ? session.journal : null, missing: false, journal: true },
+        ].filter((role) => role.missing || role.name?.trim()),
+    );
 </script>
 
 <article
@@ -35,28 +38,19 @@
 
         <div class="min-w-0">
             <p class="kicker {isSession ? 'text-journal' : 'text-brand-700'}">{isSession ? `Session ${session.number}` : 'Plenary'}</p>
-            {#if session.journal}
-                <h3 class="mt-1 font-serif text-xl leading-snug font-semibold text-journal">
-                    <Highlight text={session.journal} query={board.query} />
-                </h3>
-                {#if session.title}
-                    <p class="mt-1 text-base leading-snug text-ink-600"><Highlight text={session.title} query={board.query} /></p>
-                {/if}
-            {:else if session.title}
-                <h3 class="mt-1 font-serif text-xl leading-snug font-semibold text-ink-900">
-                    <Highlight text={session.title} query={board.query} />
-                </h3>
-            {/if}
+            <h3 class="mt-1 font-serif text-xl leading-snug font-semibold text-ink-900">
+                <Highlight text={heading} query={board.query} />
+            </h3>
 
-            {#if isSession}
+            {#if roles.length}
                 <dl class="mt-4 flex flex-wrap gap-x-10 gap-y-3">
-                    {#each moderators as moderator (moderator.label)}
-                        <div>
-                            <dt class="kicker {moderator.tone}">{moderator.label}</dt>
+                    {#each roles as role (role.label)}
+                        <div class="min-w-0">
+                            <dt class="kicker text-ink-500">{role.label}</dt>
                             <dd class="mt-0.5 text-[15px]">
-                                {#if moderator.missing && board.readonly}
+                                {#if role.missing && board.readonly}
                                     <span class="text-ink-500">To be announced</span>
-                                {:else if moderator.missing}
+                                {:else if role.missing}
                                     <span class="inline-flex items-center gap-1.5 font-medium text-amber-700">
                                         <span class="size-1.5 rounded-full bg-amber-500" aria-hidden="true"></span>
                                         Not assigned
@@ -68,8 +62,10 @@
                                     >
                                         Assign
                                     </button>
+                                {:else if role.journal}
+                                    <span class="font-serif font-semibold text-journal"><Highlight text={role.name ?? ''} query={board.query} /></span>
                                 {:else}
-                                    <span class="font-medium text-ink-900"><Highlight text={moderator.name ?? ''} query={board.query} /></span>
+                                    <span class="font-medium text-ink-900"><Highlight text={role.name ?? ''} query={board.query} /></span>
                                 {/if}
                             </dd>
                         </div>
@@ -96,8 +92,8 @@
 
     {#if session.items.length}
         <ol class="divide-y divide-line border-t border-line">
-            {#each session.items as item (item.id)}
-                <AgendaItemRow {item} />
+            {#each session.items as item, index (item.id)}
+                <AgendaItemRow {item} repeatsTime={isSameTimeRange(session.items[index - 1]?.time, item.time)} />
             {/each}
         </ol>
     {/if}

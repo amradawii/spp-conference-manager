@@ -17,6 +17,8 @@ class Day extends Model
     protected $fillable = [
         'date',
         'title',
+        'zoom_url',
+        'note',
     ];
 
     protected function casts(): array

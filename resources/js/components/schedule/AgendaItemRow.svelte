@@ -10,7 +10,8 @@
     import StatusMenu from './StatusMenu.svelte';
     import TimeRange from './TimeRange.svelte';
 
-    let { item }: { item: AgendaItem } = $props();
+    /** `repeatsTime`: same time as the row above (e.g. a presenter inside an oral block), so it isn't printed again. */
+    let { item, repeatsTime = false }: { item: AgendaItem; repeatsTime?: boolean } = $props();
 
     const board = getBoard();
     const details = $derived([item.speaker_role, item.affiliation].filter(Boolean).join(' · '));
@@ -22,8 +23,10 @@
         <span class="absolute inset-y-0 left-0 w-[3px] bg-rose-500" aria-hidden="true"></span>
     {/if}
 
-    <div class="md:pt-0.5">
-        <TimeRange time={item.time} cities={board.cities} emptyLabel="Within session" />
+    <div class="md:pt-0.5 {repeatsTime ? 'hidden md:block print:block' : ''}">
+        {#if !repeatsTime}
+            <TimeRange time={item.time} cities={board.cities} emptyLabel="Within session" />
+        {/if}
     </div>
 
     <div class="min-w-0">
@@ -46,7 +49,7 @@
                     </span>
                 </p>
             {:else}
-                <p class="mt-2 font-serif text-[16.5px] leading-snug text-ink-800">
+                <p class="mt-2 font-serif text-[16.5px] leading-snug whitespace-pre-line text-ink-800">
                     <Highlight text={item.title ?? ''} query={board.query} />
                 </p>
             {/if}

@@ -21,8 +21,8 @@ class ConferenceSessionResource extends JsonResource
             'journal' => $this->journal,
             'title' => $this->title,
             'time' => $this->day->timeRange($this->starts_at, $this->ends_at),
-            'spp_moderator' => $this->spp_moderator,
-            'journal_moderator' => $this->journal_moderator,
+            'chair' => $this->chair,
+            'co_chair' => $this->co_chair,
             'items' => AgendaItemResource::collection($this->items),
             $this->mergeUnless($request->routeIs('schedule.public'), fn () => [
                 'updated_by' => $this->updated_by,

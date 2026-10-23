@@ -127,7 +127,7 @@
                 onkeydown={onSearchKeydown}
                 type="search"
                 maxlength="100"
-                placeholder="Search keynotes, topics, moderators…"
+                placeholder="Search speakers, topics, chairs…"
                 aria-label="Search"
                 class="h-10 w-full rounded-lg border-0 bg-white pr-10 pl-9 text-sm text-ink-900 ring-1 ring-line-strong ring-inset placeholder:text-ink-400 hover:ring-ink-300 focus:ring-2 focus:ring-ink-700 focus:outline-none [&::-webkit-search-cancel-button]:hidden"
             />

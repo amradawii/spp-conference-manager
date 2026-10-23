@@ -32,8 +32,8 @@ class SaveConferenceSessionRequest extends FormRequest
             'title' => ['nullable', 'string', 'max:255', 'required_without:journal'],
             'starts_at' => ['required', 'date_format:H:i'],
             'ends_at' => ['required', 'date_format:H:i', 'after:starts_at'],
-            'spp_moderator' => ['nullable', 'string', 'max:255'],
-            'journal_moderator' => ['nullable', 'string', 'max:255'],
+            'chair' => ['nullable', 'string', 'max:255'],
+            'co_chair' => ['nullable', 'string', 'max:255'],
             'expected_updated_at' => [Rule::requiredIf(! $this->isCreating()), 'nullable', 'string'],
         ];
     }

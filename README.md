@@ -1,21 +1,21 @@
 # SPP Conference Manager
 
-A shared schedule board for the **Science Park Publisher (SPP) Online Conference**, 24–25 October 2026.
+A shared schedule board for the **International Conference for Science Park Publisher (ICSPP-2026)**, 24–25 October 2026 (online).
 It replaces the PDF drafts that were edited and re-posted after every change: the team keeps one live schedule, and speakers and attendees always see the current programme.
 
 ## Features
 
 **Public programme** (the domain root)
 
-- Full two-day programme with every time shown in Cairo and Prague, including the 25 October clock change
-- Filter by day or session, and search by speaker, topic, journal or moderator
+- Full two-day programme with session chairs, journal titles, the daily Zoom links and every time shown in Cairo and Prague, including the 25 October clock change
+- Filter by day or session, and search by speaker, topic, journal or session chair
 - **Save PDF**: a clean A4 programme with page numbers, generated on the server
 - No statuses, notes or internal details
 
 **Team board** (private link)
 
 - Speaker confirmation and assets status in one or two clicks
-- Moderators, notes, and add / edit / remove sessions and talks
+- Session chairs, notes, and add / edit / remove sessions and talks
 - Every change shows who made it and when; the editor's name is remembered per device
 - Summary counters and filters for what still needs work (pending, warning, not attending)
 - "Copy read-only link" to share the public programme

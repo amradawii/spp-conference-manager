@@ -2,12 +2,12 @@ import { day, item, session } from '@/test/fixtures';
 import { describe, expect, it } from 'vitest';
 import { applyFilters, emptyFilters, parseFilters, scopeDays, sessionLabel, toQueryString, type Filters } from './filters';
 
-const opening = session({ kind: 'ceremony', number: null, journal: null, title: 'Opening Ceremony', spp_moderator: null, journal_moderator: null });
+const opening = session({ kind: 'ceremony', number: null, journal: null, title: 'Opening Ceremony', chair: null });
 const climate = session({
     number: 1,
     journal: 'Journal of Climate Change Action (JCCA)',
-    spp_moderator: 'Sara Ayman',
-    journal_moderator: null,
+    chair: null,
+    co_chair: 'Sara Ayman',
     items: [
         item({ speaker_name: 'Prof. Šárka Nováková', speaker_status: 'confirmed', assets_status: 'ready' }),
         item({ speaker_name: 'Dr. Omar Fathy', speaker_status: 'not_attending', assets_status: 'pending', title: null }),
@@ -16,7 +16,7 @@ const climate = session({
 const materials = session({
     number: 2,
     journal: 'Sustainable Materials (SM)',
-    spp_moderator: 'Mona Ali',
+    chair: 'Mona Ali',
     items: [item({ speaker_name: 'Dr. Lina Saleh', emails: ['lina@example.org'] })],
 });
 const days = [day([opening, climate]), day([materials], { date: '2026-10-25' })];
@@ -75,8 +75,8 @@ describe('applyFilters', () => {
         expect(speakerNames(applyFilters(days, filters({ flag: 'topic_tbd' })))).toEqual(['Dr. Omar Fathy']);
     });
 
-    it('lists whole sessions that miss a moderator', () => {
-        const result = applyFilters(days, filters({ flag: 'missing_moderator' }));
+    it('lists whole sessions that miss a chair', () => {
+        const result = applyFilters(days, filters({ flag: 'missing_chair' }));
 
         expect(result.flatMap((d) => d.sessions)).toEqual([climate]);
     });

@@ -18,6 +18,8 @@ class DayResource extends JsonResource
             'id' => $this->id,
             'date' => $this->date->toDateString(),
             'title' => $this->title,
+            'zoom_url' => $this->zoom_url,
+            'note' => $this->note,
             'time' => $this->timeRange($this->sessions->min('starts_at'), $this->sessions->max('ends_at')),
             'utc_offsets' => $this->utcOffsets(),
             'sessions' => ConferenceSessionResource::collection($this->sessions),

@@ -23,8 +23,8 @@ class ConferenceSession extends Model
         'title',
         'starts_at',
         'ends_at',
-        'spp_moderator',
-        'journal_moderator',
+        'chair',
+        'co_chair',
         'updated_by',
     ];
 

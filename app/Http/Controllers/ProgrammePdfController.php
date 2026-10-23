@@ -30,6 +30,8 @@ class ProgrammePdfController extends Controller
         $canvas->page_text(42, $y, $conference->name.' · Programme', $font, 7.5, $grey);
         $canvas->page_text($canvas->get_width() - 100, $y, 'Page {PAGE_NUM} of {PAGE_COUNT}', $font, 7.5, $grey);
 
-        return $pdf->download(Str::slug($conference->name).'-programme.pdf');
+        $shortName = Str::match('/\(([^)]+)\)$/', $conference->name) ?: $conference->name;
+
+        return $pdf->download(Str::slug($shortName).'-programme.pdf');
     }
 }

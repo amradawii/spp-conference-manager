@@ -31,6 +31,25 @@
         </div>
     </div>
 
+    {#if day.zoom_url || day.note}
+        <div class="mt-5 rounded-lg border border-line bg-white px-5 py-3.5 text-sm sm:px-6">
+            {#if day.zoom_url}
+                <p class="kicker text-brand-700">Zoom link for Day {number}</p>
+                <a
+                    href={day.zoom_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="mt-0.5 inline-block font-medium break-all text-ink-900 underline decoration-ink-200 underline-offset-4 transition-colors hover:decoration-ink-500"
+                >
+                    {day.zoom_url}
+                </a>
+            {/if}
+            {#if day.note}
+                <p class="leading-relaxed text-ink-600 {day.zoom_url ? 'mt-2' : ''}">{day.note}</p>
+            {/if}
+        </div>
+    {/if}
+
     <div class="mt-5 space-y-5">
         {#each day.sessions as session (session.id)}
             <SessionBlock {session} />

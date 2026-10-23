@@ -9,20 +9,20 @@
 ## 1. Problem & Goal
 
 The SPP team (researchers + 3 IT specialists acting as Zoom hosts) prepares a
-two-day online conference with 8 journal sessions and 38 speakers. Today the
-schedule lives in a PDF that is edited, re-exported and re-posted to a WhatsApp
-group after every change (we are on draft 8). Google Docs is live but has no
+two-day online conference with 9 journal sessions and about 50 speakers. Before
+the app, the schedule lived in a PDF that was edited, re-exported and re-posted
+to a WhatsApp group after every change (draft 8, then the final version of 23 Oct). Google Docs is live but has no
 structure: you can't filter it, and statuses are just highlighted text.
 
 **Goal:** one shared link where everyone sees the same schedule. Anyone can
-update a speaker's confirmation, the assets status, the moderators, or add a
+update a speaker's confirmation, the assets status, the session chairs, or add a
 note in one or two clicks, and every change shows who made it.
 
 ### Who uses it
 
 | Person | What they need |
 |---|---|
-| Researchers | Contact keynotes, mark Confirmed / Not attending, collect assets, assign moderators, leave notes |
+| Researchers | Contact keynotes, mark Confirmed / Not attending, collect assets, assign session chairs, leave notes |
 | IT specialists (Zoom hosts) | See which assets are ready, and which speakers are absent so IT presents their assets instead |
 | Coordinators | Overview: what is still pending, what is at risk |
 
@@ -34,8 +34,9 @@ time. The app therefore shows **every time in both Cairo and Prague**.
 | Term | Meaning |
 |---|---|
 | SPP | Science Park Publisher, the organizer |
-| SPP moderator | SPP staff member who runs a session (e.g. Sara Ayman) |
-| Journal moderator | Editor from the session's journal who moderates alongside SPP |
+| Session chair | Editor from the session's journal who chairs it (some sessions also have a co-chair) |
+| Journal title | The journal a session belongs to, e.g. "Integrated Nano (IN)" |
+| Oral presentations | Shorter contributed talks, grouped under an "Oral Presentations" header inside a session |
 | Keynote | 15-minute invited talk |
 | Assets | PowerPoint slides / videos played in the session; IT presents them if the speaker is absent |
 | Plan-A / Plan-B | Fallback slot: discussion if time allows, otherwise poster video-graph |
@@ -46,7 +47,7 @@ time. The app therefore shows **every time in both Cairo and Prague**.
 
 | Topic | Decision | Why |
 |---|---|---|
-| Name | **SPP Conference Manager** (app). The event is seeded as "SPP Online Conference 2026" | Requested |
+| Name | **SPP Conference Manager** (app). The event is seeded as "The International Conference for Science Park Publisher (ICSPP-2026)" | Requested |
 | Access | One **secret team link** per conference (`/s/{token}`) for editing; no login. The **domain itself** (`/`) is the read-only programme for speakers and attendees (section 3.9) | Fastest to share in WhatsApp; the 40-char token can't be guessed; the public link is short and never changes |
 | Identity | Ask for the editor's name **once per device**, keep it in a long-lived cookie, show "Editing as Sara · change" | Every change is attributed without asking on every click |
 | Live updates | **None.** Data refreshes after your own edits, on page reload, or with the Refresh button | Edit volume is low; avoids websockets and polling |
@@ -74,7 +75,7 @@ admin panel (conferences are created with a seeder/artisan) · per-session Zoom 
 1. **One page.** The whole conference is a single scrollable agenda, so there are no pages to navigate between.
 2. **Status sits next to the record**, as on the PDF screenshot: each speaker row has a status column on the right.
 3. **One click to change a status.** Click the pill, pick the new value, done. No forms for the common action.
-4. **Problems stand out.** Status colour (amber, rose, emerald) appears only where action is needed (pending, at risk, missing moderator, topic TBD). A few quiet programme colours, as in the PDF, only help the eye find sessions, speakers and moderators.
+4. **Problems stand out.** Status colour (amber, rose, emerald) appears only where action is needed (pending, at risk, missing chair, topic TBD). A few quiet programme colours, as in the PDF, only help the eye find sessions, speakers and chairs.
 5. **Never lose an action.** If the editor name is missing, the name modal opens first and the original action then continues automatically.
 6. **No time-zone math for the team.** Cairo time is always shown first, with Prague below it.
 
@@ -85,7 +86,7 @@ admin panel (conferences are created with a seeder/artisan) · per-session Zoom 
 │ [SPP logo] │ CONFERENCE MANAGER                           Editing as Sara ▾   │ (logo has a
 │                                                                               │  white wordmark)
 │ TEAM SCHEDULE BOARD                                                           │
-│ SPP Online Conference 2026                                                    │
+│ The International Conference for Science Park Publisher (ICSPP-2026)   (logo) │
 │ 24–25 October 2026 · Online via Zoom                     Loaded 10:42 Refresh │
 │  ┌──────────────────────────────────────────────────────────────────────────┐ │
 └──│ Speakers confirmed │ Assets ready │ Not attending │ Warning │ Topics TBD │ │─┘ summary card
@@ -105,8 +106,8 @@ admin panel (conferences are created with a seeder/artisan) · per-session Zoom 
 │ 10:30–12:00  │ SESSION 1                                 │ 1 note · Edit      │
 │ Cairo        │ Integrated Nano (IN)                      │                    │
 │ 09:30–11:00  │ Nanomaterials for Energy Harvesting & …   │                    │
-│ Prague       │ SPP MODERATOR  Sara Ayman                 │                    │
-│              │ JOURNAL MODERATOR  ● Not assigned (amber) │                    │
+│ Prague       │ SESSION CHAIR  ● Not assigned (amber)     │                    │
+│              │ JOURNAL TITLE  Integrated Nano (IN)       │                    │
 ├──────────────┼──────────────────────────────────────────┼────────────────────┤
 │ 10:30–10:45  │ KEYNOTE 1                                 │ Speaker ● Confirmed│
 │ Cairo        │ Prof. Nader Shahata                       │ Assets  ● Pending  │
@@ -124,11 +125,11 @@ admin panel (conferences are created with a seeder/artisan) · per-session Zoom 
                                                             + Add item to session
 ```
 
-- **Header:** dark navy band (the SPP logo has a white wordmark), app name, conference name, dates, "Loaded at HH:MM · Refresh" and "Editing as {name}" (click to change) or "Set your name".
-- **Summary card:** overlaps the header band. Counts for the current Day/Session scope. Each counter is a toggle that filters to the rows behind it: *Speakers confirmed* → pending speakers, *Assets ready* → pending assets (both show "N pending" under the bar), *Not attending*, *Warning* (absent, no assets), *Topics TBD*, *Missing moderator*. Counters at 0 are disabled.
+- **Header:** dark navy band (the SPP logo has a white wordmark), app name, conference name with the round event logo on the right (above the title on phones), dates, "Loaded at HH:MM · Refresh" and "Editing as {name}" (click to change) or "Set your name".
+- **Summary card:** overlaps the header band. Counts for the current Day/Session scope. Each counter is a toggle that filters to the rows behind it: *Speakers confirmed* → pending speakers, *Assets ready* → pending assets (both show "N pending" under the bar), *Not attending*, *Warning* (absent, no assets), *Topics TBD*, *Missing chair*. Counters at 0 are disabled.
 - **Time zones notice:** explains the two times and the clock change. It is generated from the data, so it disappears if both days have the same gap.
-- **Day header:** sticky while scrolling through that day, with the day's span in both cities and their UTC offsets.
-- **Session block:** time (both cities), number, journal, title, both moderators, notes, Edit.
+- **Day header:** sticky while scrolling through that day, with the day's span in both cities and their UTC offsets. Below it, a read-only panel with the day's Zoom link and note (same on the team and public views; changed in the seeder, not in the app).
+- **Session block:** time (both cities), number, title, session chair, co-chair and journal title, notes, Edit.
 - **Item row:** three columns (time · details · status). Segments such as Plan-A/Plan-B, orals and closings use the same row, muted, with no status pills. Ceremonies are labelled "Plenary".
 
 ### 3.3 Mobile (WhatsApp link opened on a phone)
@@ -136,7 +137,7 @@ admin panel (conferences are created with a seeder/artisan) · per-session Zoom 
 ```
 ┌─────────────────────────────┐
 │ [logo]                Sara ▾│  dark band
-│ SPP Online Conference 2026  │
+│ (logo) ICSPP-2026 title     │
 │ ┌─────────────┬───────────┐ │
 │ │ Confirmed   │ Assets    │ │  summary: 2 columns
 │ │ 0/38        │ 0/38      │ │
@@ -174,7 +175,7 @@ Derived flags, computed on the client with no database column (`resources/js/lib
 | **At risk** (labelled "Warning") | Not attending + assets pending | Rose left border on the row + "No assets for IT to present" |
 | **IT presents** | Not attending + assets ready | Muted line "IT host presents the assets" |
 | **Topic TBD** | Speaker item with no topic | Amber "Topic TBD" (like the yellow highlight in the PDF) |
-| **Moderator missing** | Numbered session with an empty SPP or journal moderator | Amber "Not assigned" |
+| **Chair missing** | Numbered session with an empty session chair | Amber "Not assigned" |
 
 ### 3.5 Time display
 
@@ -190,7 +191,7 @@ Derived flags, computed on the client with no database column (`resources/js/lib
 |---|---|
 | Change status | Click pill → small menu (dot + label + one-line hint, "Current" marker) → select. The pill reads "Saving…" → toast "Status saved". |
 | Notes | "Add note" / "Notes (n)" opens a modal: on a device without a saved name, a required "Your name" field first; then the textarea (Ctrl+Enter submits, "Signed as {name}"), then notes newest first with author and relative time. Delete asks inline ("Delete this note for everyone?"). Available on items and sessions. |
-| Edit item / session | "Edit" opens a right-side drawer with a form. Moderators are edited here. Empty moderator fields show "Assign" as a link into the drawer. |
+| Edit item / session | "Edit" opens a right-side drawer with a form. Chairs are edited here. An empty session chair shows "Assign" as a link into the drawer. |
 | Add | "+ Add item to this session" at the end of each session; "+ Add session to Day N" at the end of each day. Hidden while filtering, so new rows never land in a filtered-out place. |
 | Delete | In the drawer footer, with an inline confirmation naming the record ("Delete Prof. Veera Rajendran and its notes?", "Delete this session and its 7 items?"). |
 | Editor name | First write action without a name → modal "Who is making changes?". Saved → the original action runs. If the cookie is lost later, the server's `editor_name` error re-opens the modal and retries. Clicking the name in the header opens "Change your name", which also has **Reset my name** (removes the cookie, e.g. on a shared or test device). |
@@ -208,9 +209,9 @@ Times are entered in the drawer in **Prague time** (the programme's time); the C
 
 - **Day:** segmented control `All | Day 1 · Sat 24 Oct | Day 2 · Sun 25 Oct`.
 - **Session:** select that depends on Day. With Day 1 selected it lists `Session 1 · IN` … `Session 5 · …` plus the plenary blocks. With All it lists every session grouped by day. Picking another day clears a session that isn't on it.
-- **Search:** matches speaker name, role, affiliation, topic, label and email, plus the session's journal, title and moderators (a session match keeps the whole session, so "Sara" lists every session she moderates). Case- and accent-insensitive (`Šárka` = `sarka`); matches are highlighted.
+- **Search:** matches speaker name, role, affiliation, topic, label and email, plus the session's journal, title, chair and co-chair (a session match keeps the whole session, so "Attia" lists every session he chairs). Case- and accent-insensitive (`Šárka` = `sarka`); matches are highlighted.
 - **Speaker status** and **Assets status** selects.
-- **Flag** (set from the summary counters): warning (at risk), topic TBD, missing moderator. Shown as a removable chip.
+- **Flag** (set from the summary counters): warning (at risk), topic TBD, missing chair. Shown as a removable chip.
 - All filters combine with AND. Sessions with no matching items are hidden. When no filter is active, every session is shown.
 - State lives in the query string: `?day=1&session=12&q=nader&speaker=pending&assets=pending&flag=at_risk`. Updated 250 ms after typing stops, with Inertia's `router.replace` (no history spam, no server round-trip; keeps Inertia's history state intact). Invalid values in a pasted URL are ignored.
 - Empty state: "Nothing matches these filters" + "Clear filters".
@@ -221,15 +222,15 @@ Times are entered in the drawer in **Prague time** (the programme's time); the C
 - **Header:** deep navy band (`ink-950`) carrying the SPP logo, whose wordmark is white. A thin teal→green gradient line taken from the logo closes the band.
 - **Typography:** *Source Serif 4* for conference, day, session titles and talk topics (academic, publisher feel). *Inter* for everything else. `tabular-nums` for times. Fonts are self-hosted via Fontsource (no Google Fonts requests).
 - **Color:** warm off-white page (`canvas`), white surfaces, hairline warm borders (`line`), ink-navy text. The brand teal/green appears only as accents (header line, day and plenary labels, progress bars, focus). Status colors appear only in soft tinted pills with a small dot.
-- **Programme colours** (taken from the PDF, darkened for contrast, at most one per line): `journal` navy blue for session numbers, journal names and the journal moderator label, with a faint blue tint behind session headers; `talk` burnt orange for talk labels ("KEYNOTE 1"); `spp` deep red for the SPP moderator label. Topic TBD keeps the PDF's yellow highlight.
+- **Programme colours** (taken from the PDF, darkened for contrast, at most one per line): `journal` navy blue for session numbers, journal titles and chair labels, with a faint blue tint behind session headers; `talk` burnt orange for talk labels ("KEYNOTE 1"). Topic TBD keeps the PDF's yellow highlight.
 - **Rows:** item rows alternate white / `stripe` (very light warm gray) so the eye can follow a row from time to status.
 - **Shape and depth:** `rounded-xl` cards, a single soft shadow on the summary card, almost none elsewhere.
-- **Labels:** small caps, letter-spaced labels ("KEYNOTE 1", "SPP MODERATOR") instead of icons.
+- **Labels:** small caps, letter-spaced labels ("KEYNOTE 1", "SESSION CHAIR") instead of icons.
 - **Icons:** 6 in total (search, chevron, close, filters, copy, check), from `@lucide/svelte`. Actions use words ("Edit", "Notes", "Refresh"), not icon buttons; copy is the one exception because it sits inline after each email.
 - **Motion:** almost none: colour transitions on hover and the progress bars. Menus, drawers and toasts appear instantly.
 - **Accessibility:** contrast ≥ 4.5:1 for text (including the muted `ink-400` and the programme colours), visible focus rings, a "Skip to schedule" link as the first Tab stop, status is never conveyed by color alone (always a label), dialogs trap focus, icon buttons have labels.
 
-Tokens live in `resources/css/app.css` (Tailwind v4 `@theme`): `ink-50…950`, `canvas`, `line`, `line-strong`, `stripe`, `brand-300…700`, `brand-teal`, `journal`, `talk`, `spp`, plus the `label-caps` utility (small UI labels) and the larger, bold `kicker` utility (programme labels: day, "SESSION 1", "PLENARY", "KEYNOTE 1", moderator roles). Page width: `max-w-7xl` (1280 px).
+Tokens live in `resources/css/app.css` (Tailwind v4 `@theme`): `ink-50…950`, `canvas`, `line`, `line-strong`, `stripe`, `brand-300…700`, `brand-teal`, `journal`, `talk`, `spp`, plus the `label-caps` utility (small UI labels) and the larger, bold `kicker` utility (programme labels: day, "SESSION 1", "PLENARY", "KEYNOTE 1", chair roles). Page width: `max-w-7xl` (1280 px).
 
 ### 3.9 Read-only programme (add-on)
 
@@ -245,7 +246,7 @@ The team sends one link to keynote speakers and attendees: **the domain itself**
 | Filters | Day, session, search, speaker status, assets status | Day, session, search |
 | Status pills, warnings, "IT presents" | Yes | No |
 | Notes, Edit, Add, Assign, "Noha · 2 hr. ago" | Yes | No |
-| Missing moderator | Amber "Not assigned" + Assign | Muted "To be announced" |
+| Missing chair | Amber "Not assigned" + Assign | Muted "To be announced" |
 | Emails | Links + copy icon | Plain links (they were in the shared PDF) |
 | Topic TBD highlight, colours, stripes, print layout | Yes | Yes |
 
@@ -258,11 +259,11 @@ The team sends one link to keynote speakers and attendees: **the domain itself**
 
 ### 3.10 Programme PDF (add-on)
 
-"Save PDF" downloads `GET /programme.pdf` (`spp-online-conference-2026-programme.pdf`): the read-only programme of the newest conference, designed for A4 paper.
+"Save PDF" downloads `GET /programme.pdf` (`icspp-2026-programme.pdf`, from the short name in brackets): the read-only programme of the newest conference, designed for A4 paper.
 
 - **Engine: dompdf** (`barryvdh/laravel-dompdf`), pure PHP. Nothing to install on the server (no Node, no Chromium), about 1 second per download, about 70 KB per file. Headless Chrome was rejected: pixel-perfect, but it needs Node + Chromium (~300 MB) and a lot of RAM per render on the VPS.
 - **Its own template** (`resources/views/pdf/programme.blade.php` + `pdf/partials/`), because dompdf only understands simple CSS (tables, blocks; no Tailwind, flex or grid), and a layout made for paper reads better than a printed web page anyway.
-- **Layout:** a slim navy masthead with the logo and "Conference programme" on page 1 only; conference title, dates and the time-zones note; then each day (Day 2 starts on a new page) with its Cairo/Prague span and UTC offsets; sessions with a coloured top rule (journal blue, plenary green), session number, journal, title and both moderators; talks as striped rows: Cairo and Prague time, label, speaker, role · affiliation, topic in serif, emails. "Topic TBD" keeps the yellow highlight, missing moderators read "To be announced".
+- **Layout:** a slim navy masthead with the logo and "Conference programme" on page 1 only; conference title, dates and time-zones note with the event logo on the right; then each day with its Zoom link and note (Day 2 starts on a new page) with its Cairo/Prague span and UTC offsets; sessions with a coloured top rule (journal blue, plenary green), session number, title, session chair, co-chair and journal title; talks as striped rows: Cairo and Prague time, label, speaker, role · affiliation, topic in serif, emails. A time equal to the row above is not repeated. "Topic TBD" keeps the yellow highlight, a missing chair reads "To be announced".
 - **Footer on every page:** "{conference} · Programme" and "Page X of Y" (drawn by dompdf's canvas after rendering).
 - **Page breaks without ugly gaps:** a talk row never splits across pages, and a session header always stays with its first talk. Margins come from `@page` (a global `* { margin: 0 }` reset must not be used: dompdf applies it to the page and the margins disappear).
 - **Fonts:** Inter and Source Serif 4 as static TTFs in `resources/fonts/` (full character sets, e.g. "Šárka"); dompdf embeds only the glyphs used. Its font cache lives in `storage/fonts/` (must be writable).
@@ -306,19 +307,21 @@ erDiagram
         bigint conference_id FK
         date date "unique per conference"
         string title "Sustainable Materials"
+        string zoom_url "nullable, shown on both views"
+        text note "nullable, e.g. the winter-time notice"
         timestamps _
     }
     conference_sessions {
         bigint id PK
         bigint day_id FK
         string kind "session | ceremony"
-        tinyint number "nullable, 1..8"
+        tinyint number "nullable, 1..9"
         string journal "nullable"
         string title "nullable"
         time starts_at
         time ends_at
-        string spp_moderator "nullable"
-        string journal_moderator "nullable"
+        string chair "nullable, Session Chair"
+        string co_chair "nullable"
         string updated_by "nullable"
         timestamps _
     }
@@ -413,7 +416,7 @@ middleware and `throttle:60,1`; saving the name uses `throttle:20,1`.
 | POST | `/s/{token}/notes` | `NoteController@store` | Add note (`notable_type`, `notable_id`) | ✅ 5 |
 | DELETE | `/s/{token}/notes/{note}` | `NoteController@destroy` | Delete note | ✅ 5 |
 | POST | `/s/{token}/sessions` | `ConferenceSessionController@store` | Add session | ✅ 6 |
-| PUT | `/s/{token}/sessions/{session}` | `ConferenceSessionController@update` | Edit session details and moderators | ✅ 6 |
+| PUT | `/s/{token}/sessions/{session}` | `ConferenceSessionController@update` | Edit session details and chairs | ✅ 6 |
 | DELETE | `/s/{token}/sessions/{session}` | `ConferenceSessionController@destroy` | Delete session (and its items) | ✅ 6 |
 | POST | `/s/{token}/sessions/{session}/items` | `AgendaItemController@store` | Add item | ✅ 6 |
 | PUT | `/s/{token}/items/{item}` | `AgendaItemController@update` | Edit item details | ✅ 6 |
@@ -523,7 +526,7 @@ resources/
 
 **Test strategy (no more than needed):**
 
-- **Feature tests (PHPUnit, 50):** the programme PDF downloads, contains the programme ("Topic TBD", "To be announced") but no notes, editor names or statuses, and is a 404 without a conference; board loads with a valid token and returns 404 for a wrong one; the home page shows the newest conference read-only without statuses, notes, `updated_by` or the team link, can't write, and falls back to "published soon"; noindex/referrer meta and security headers; Cairo/Prague conversion across the clock change; item ordering; notes order; seeder counts, corrections and idempotency; link command and token rotation; editor name cookie, validation and resetting it; writes without a name rejected; status persistence with `updated_by`; notes create/delete/validation; session and item create/update/delete, validation, type rules, stale guard; one conference can't read or change another's rows.
+- **Feature tests (PHPUnit, 51):** the programme PDF downloads, contains the programme ("Topic TBD", "To be announced") but no notes, editor names or statuses, and is a 404 without a conference; board loads with a valid token and returns 404 for a wrong one; the home page shows the newest conference read-only without statuses, notes, `updated_by` or the team link, can't write, and falls back to "published soon"; noindex/referrer meta and security headers; Cairo/Prague conversion across the clock change; item ordering; notes order; seeder counts, chairs and idempotency; replacing the draft programme keeps the team link, statuses and notes; link command and token rotation; editor name cookie, validation and resetting it; writes without a name rejected; status persistence with `updated_by`; notes create/delete/validation; session and item create/update/delete, validation, type rules, stale guard; one conference can't read or change another's rows.
 - **Unit tests (Vitest, 29):** derived flags, summary counts, date/offset/relative-time formatting, time shifting, accent-insensitive search and highlighting, filter combinations, URL round-trip and validation, session labels.
 - **Browser check:** a throwaway script drives headless Edge over the DevTools protocol through the main flows (status change with the name prompt, notes, stale edit, drawers, search, summary shortcut, copy email, forget name, print media, mobile at 390 px) and fails on console errors.
 
@@ -626,28 +629,28 @@ flowchart LR
 
 ---
 
-## 6. Seed Data (from draft 8 PDF)
+## 6. Seed Data (from the final PDF, 23 Oct 2026)
 
 Seeder: `database/seeders/Spp2026ConferenceSeeder.php` (called by `DatabaseSeeder`).
-Data is a plain PHP array mirroring the PDF. All statuses start as `pending`,
-and "Topic: TBD" is stored as `null`. Running it twice does nothing (it checks the conference name).
+Data is plain PHP mirroring the PDF. All statuses start as `pending`,
+and a missing topic is stored as `null` ("Topic TBD"). Running it twice does nothing (it checks the conference name).
 
-**Counts:** 2 days · 8 numbered sessions + 3 plenary blocks (opening ceremony, closing of Day 1, closing ceremony) · 32 keynotes · 2 opening addresses · 4 orals (Session 4) · segment rows for Plan-A/B, orals and discussions. Talk titles are kept exactly as printed.
+**Counts:** 2 days, each with its Zoom link (Day 2 also has the winter-time note) · 9 numbered sessions + 2 plenary blocks (closing of Day 1, closing ceremony) · 35 keynotes · 3 addresses · 12 orals · 22 segment rows (Oral Presentations headers, launched journals, Session 7 Part I/II, break) · 72 items. Talk titles are kept exactly as printed; multi-line titles keep their line breaks.
 
-**Data issues in the PDF, fixed while seeding:**
+**How the PDF maps to the app:**
 
 | PDF | Seeded as |
 |---|---|
-| Session 6: "11:45–11:30 am" | 10:45–11:30 |
-| Session 2: "12:00 am–12:15 pm" | 12:00–12:15 |
-| Opening talks have durations but no times | 09:00–09:15 and 09:15–09:30 |
-| Session 4 talks have no individual times | `starts_at = null`, ordered by `position` ("Within session") |
-| Session 6 has two journal moderators | `journal_moderator`: "Prof. Magda EL-Massik (Keynotes 1–3) · Prof. Maged Wasfy (Keynotes 4–5)"; their emails and affiliations are added as session notes |
-| Session 4 has no SPP moderator | Left empty, so it shows "Not assigned" |
-| "Editorial Borad Member" | Spelling corrected |
-| Session 4 Computer: "??? Dr. Hesham (Editor in-Cheif: Frag (WhatsApp) & Hazem Bakery)" | Speaker "Dr. Hesham" plus the original text as a note |
-| "Welcome Address and Opening of the Plenary Session" | Added to the role: "Editor-in-Chief · Opens the plenary session" |
-| Three speakers have 2 emails | `emails` array |
+| Session chair / co-chair | `chair` / `co_chair` on the session |
+| Journal title | `journal` (shown as "Journal Title" under the chairs) |
+| "Oral Presentations" block | A segment labelled "Oral Presentations", followed by `oral` items "Presenter N" |
+| Session 5 "Launched Journals" | One segment per journal, followed by its keynotes |
+| Session 7 Part I / Part II, each with its own co-chair | `co_chair`: "Part I: Prof. Magda EL-Massik, Associate Editor · Part II: Prof. Maged Wasfy, Associate Editor", plus Part I/II segments |
+| Speakers listed with the same time slot | Each item keeps the slot; the app prints the time only on the first one |
+| Emails | Not in the final PDF, so none are seeded |
+| "Borad", "Virgina", "Technologie", "Ass. Prof.", "Wurzburg" | Spelling corrected ("Board", "Virginia", "Technologies", "Asst. Prof.", "Würzburg") |
+
+**From draft 8 to the final programme (live data):** the migration `2026_10_23_000002_load_final_programme` calls `Spp2026ConferenceSeeder::replaceProgramme()` for a conference still named "SPP Online Conference 2026". It renames the conference, swaps the days, sessions and items for the final ones, and keeps the team link. Speaker and assets statuses (with who changed them and when) and notes are carried over to the same people, matched by name without titles or accents (plus one renamed speaker: Abou Hdid → Abou Hadid). The notes the seeder itself created from draft 8 are dropped. On an empty database it does nothing; the seeder creates the final programme instead.
 
 > **Timezone heads-up:** the PDF labels both days "CET", but Day 1 is actually
 > CEST (UTC+2). Europe moves to winter time at 03:00 on Sunday 25 Oct 2026, so
@@ -799,3 +802,5 @@ Each phase ends in a working, testable state.
 | 2026-10-18 | Read-only view hides statuses, status filters, notes, editing and the summary; keeps time zones, day/session/search filters and emails (already public in the shared PDF), shown as plain links |
 | 2026-10-18 | "Save PDF" (server-made, dompdf) replaces "Print": the same polished file for everyone, independent of browser print settings. dompdf over headless Chrome: pure PHP, nothing extra on the VPS, fast enough for ~10 pages; its simpler CSS is handled by a dedicated table-based template |
 | 2026-10-18 | Auto-deploy with GitHub Actions: tests must pass before anything reaches the server; assets are built in CI, so the server needs no Node; `git reset --hard` + `migrate --force` + `optimize` on each push |
+| 2026-10-23 | Final programme: "SPP moderator" removed, "Journal moderator" becomes "Session Chair" (+ optional co-chair), the journal is shown as "Journal Title". Each day gets a read-only Zoom link and note on both views. The event logo sits on the right of the header and the PDF cover |
+| 2026-10-23 | The final programme reaches the live site through a migration, not `migrate:fresh`: the team link, statuses and notes survive, and the deploy needs no manual commands. Destructive artisan commands are blocked in production |

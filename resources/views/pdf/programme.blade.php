@@ -44,33 +44,37 @@
         .masthead img { height: 26pt; }
         .rule { height: 2pt; background: #17b8b0; }
 
-        .cover { padding: 18pt 0 6pt; }
-        .cover h1 { font-family: 'Source Serif', serif; font-weight: bold; font-size: 22pt; line-height: 1.15; color: #0b1426; }
+        .cover { padding: 14pt 0 4pt; }
+        .cover td { vertical-align: middle; }
+        .cover .logo { width: 80pt; text-align: right; }
+        .cover .logo img { width: 72pt; height: 72pt; }
+        .cover h1 { font-family: 'Source Serif', serif; font-weight: bold; font-size: 20pt; line-height: 1.1; color: #0b1426; }
         .cover .sub { margin-top: 4pt; font-size: 10pt; color: #3f5077; }
         .zones { margin-top: 10pt; padding: 7pt 10pt; border: 0.75pt solid #e6e3dc; background: #f9f8f5; font-size: 8pt; color: #3f5077; }
 
-        .day { padding-top: 16pt; }
+        .day { padding-top: 12pt; }
         .day-break { page-break-before: always; padding-top: 0; }
         .day-head { border-bottom: 1.5pt solid #d6d2c8; padding-bottom: 6pt; margin-bottom: 10pt; }
         .day-head h2 { font-family: 'Source Serif', serif; font-weight: bold; font-size: 16pt; color: #0b1426; margin-top: 2pt; }
         .day-span { text-align: right; vertical-align: bottom; font-size: 8pt; }
+        .day-info { margin: -2pt 0 4pt; padding: 6pt 10pt; border: 0.75pt solid #e6e3dc; font-size: 8pt; }
+        .day-info a { color: #0b1426; font-weight: 600; text-decoration: none; }
 
-        .session { margin-top: 12pt; }
+        .session { margin-top: 10pt; }
         .session-head, .item { page-break-inside: avoid; }
         .session-head { page-break-after: avoid; }
         .session-head td { padding: 8pt 10pt; }
         .session-head.is-session { background: #f4f7fb; border-top: 1.5pt solid #1f4e8c; }
         .session-head.is-plenary { background: #f5f7fa; border-top: 1.5pt solid #0b7a62; }
         .session-head h3 { font-family: 'Source Serif', serif; font-weight: bold; font-size: 12.5pt; line-height: 1.05; margin-top: 2pt; }
-        .moderators { margin-top: 5pt; }
-        .moderators td { padding: 0 18pt 0 0; }
-        .moderators td.spp-cell { width: 34%; }
+        .role { margin-top: 3pt; font-size: 8.5pt; }
+        .session-head h3 + .role { margin-top: 5pt; }
 
         .time { width: 112pt; font-size: 8pt; line-height: 1.35; white-space: nowrap; }
         .time b { color: #0b1426; }
         .city { font-size: 6.5pt; color: #68748f; }
 
-        .item td { padding: 6pt 10pt; border-bottom: 0.5pt solid #e6e3dc; }
+        .item td { padding: 5pt 10pt; border-bottom: 0.5pt solid #e6e3dc; }
         .item.alt td { background: #f9f8f5; }
         .speaker { font-size: 10pt; font-weight: bold; color: #0b1426; margin-top: 1pt; }
         .details { margin-top: 1pt; font-size: 7.5pt; line-height: 1.3; color: #5b6b8c; }
@@ -81,7 +85,6 @@
 
         .journal { color: #1f4e8c; }
         .talk { color: #a8501f; }
-        .spp { color: #b3261e; }
         .brand { color: #0b7a62; }
     </style>
 </head>
@@ -95,8 +98,15 @@
     <div class="rule"></div>
 
     <div class="cover">
-        <h1>{{ $conference->name }}</h1>
-        <p class="sub">{{ $dateSpan }} · Online via Zoom</p>
+        <table>
+            <tr>
+                <td>
+                    <h1>{{ $conference->name }}</h1>
+                    <p class="sub">{{ $dateSpan }} · Online via Zoom</p>
+                </td>
+                <td class="logo"><img src="{{ public_path('icspp-2026-logo.png') }}" alt="ICSPP 2026"></td>
+            </tr>
+        </table>
         <div class="zones">
             Every time is shown twice: <b>{{ $cities['team'] }}</b> first, then {{ $cities['conference'] }} (the time of the official programme).
             @foreach ($days as $day)
@@ -129,6 +139,16 @@
                     @endif
                 </tr>
             </table>
+            @if ($day->zoom_url || $day->note)
+                <div class="day-info">
+                    @if ($day->zoom_url)
+                        <span class="caps brand">Zoom link for Day {{ $loop->iteration }}</span>&nbsp;&nbsp;<a href="{{ $day->zoom_url }}">{{ $day->zoom_url }}</a>
+                    @endif
+                    @if ($day->note)
+                        <p class="muted" @if ($day->zoom_url) style="margin-top: 3pt;" @endif>{{ $day->note }}</p>
+                    @endif
+                </div>
+            @endif
 
             @foreach ($day->sessions as $session)
                 @php
@@ -142,34 +162,27 @@
                                     @include('pdf.partials.time', ['time' => $time])
                                 </td>
                                 <td>
+                                    @php
+                                        $roles = array_filter([
+                                            'Session Chair' => filled($session->chair) ? '<b>'.e($session->chair).'</b>' : ($isSession ? '<span class="muted">To be announced</span>' : null),
+                                            'Session Co-Chair' => filled($session->co_chair) ? '<b>'.e($session->co_chair).'</b>' : null,
+                                            'Journal Title' => filled($session->journal) && filled($session->title) ? '<span class="serif journal"><b>'.e($session->journal).'</b></span>' : null,
+                                        ]);
+                                    @endphp
                                     <p class="caps {{ $isSession ? 'journal' : 'brand' }}">{{ $isSession ? 'Session '.$session->number : 'Plenary' }}</p>
-                                    @if ($session->journal)
-                                        <h3 class="journal">{{ $session->journal }}</h3>
-                                        @if ($session->title)
-                                            <p class="segment">{{ $session->title }}</p>
-                                        @endif
-                                    @elseif ($session->title)
-                                        <h3>{{ $session->title }}</h3>
-                                    @endif
-                                    @if ($isSession)
-                                        <table class="moderators">
-                                            <tr>
-                                                <td class="spp-cell">
-                                                    <p class="caps spp">SPP moderator</p>
-                                                    <p>{!! filled($session->spp_moderator) ? '<b>'.e($session->spp_moderator).'</b>' : '<span class="muted">To be announced</span>' !!}</p>
-                                                </td>
-                                                <td>
-                                                    <p class="caps journal">Journal moderator</p>
-                                                    <p>{!! filled($session->journal_moderator) ? '<b>'.e($session->journal_moderator).'</b>' : '<span class="muted">To be announced</span>' !!}</p>
-                                                </td>
-                                            </tr>
-                                        </table>
-                                    @endif
+                                    <h3>{{ $session->title ?? $session->journal }}</h3>
+                                    @foreach ($roles as $label => $value)
+                                        <p class="role"><span class="caps muted">{{ $label }}</span>&nbsp;&nbsp;{!! $value !!}</p>
+                                    @endforeach
                                 </td>
                             </tr>
                         </table>
                         @foreach ($session->items as $item)
-                            @include('pdf.partials.item', ['item' => $item, 'alt' => $loop->even])
+                            @php
+                                $previous = $session->items[$loop->index - 1] ?? null;
+                                $repeatsTime = $previous && $item->starts_at !== null && $previous->starts_at === $item->starts_at && $previous->ends_at === $item->ends_at;
+                            @endphp
+                            @include('pdf.partials.item', ['item' => $item, 'alt' => $loop->even, 'repeatsTime' => $repeatsTime])
                         @endforeach
                 </div>
             @endforeach

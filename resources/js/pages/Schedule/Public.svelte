@@ -8,6 +8,7 @@
     import { applyFilters, countSpeakers, emptyFilters, isFiltering, parseFilters, toQueryString, type Filters } from '@/lib/filters';
     import { formatDateSpan } from '@/lib/format';
     import { createRoutes } from '@/lib/routes';
+    import { eventLogo } from '@/lib/ui';
     import type { Conference } from '@/types/models';
     import { router } from '@inertiajs/svelte';
 
@@ -83,7 +84,7 @@
     Skip to programme
 </a>
 
-<AppHeader title={conference.name} {subtitle} kicker="Conference programme" actions={headerActions} />
+<AppHeader title={conference.name} {subtitle} kicker="Conference programme" logo={eventLogo} actions={headerActions} />
 
 <main class="mx-auto max-w-7xl px-4 pb-24 sm:px-6 print:pb-0">
     <div class="relative -mt-10 space-y-4">

@@ -1,6 +1,6 @@
 import { day, item, session } from '@/test/fixtures';
 import { describe, expect, it } from 'vitest';
-import { isAtRisk, isTopicTbd, itPresents, missingModerators, summarize } from './stats';
+import { isAtRisk, isMissingChair, isTopicTbd, itPresents, summarize } from './stats';
 
 describe('item flags', () => {
     it('flags an absent speaker without assets as at risk', () => {
@@ -22,14 +22,15 @@ describe('item flags', () => {
     });
 });
 
-describe('missingModerators', () => {
-    it('lists the empty moderator roles of a numbered session', () => {
-        expect(missingModerators(session({ spp_moderator: null, journal_moderator: '' }))).toEqual(['spp', 'journal']);
-        expect(missingModerators(session())).toEqual([]);
+describe('isMissingChair', () => {
+    it('flags a numbered session without a chair', () => {
+        expect(isMissingChair(session({ chair: null }))).toBe(true);
+        expect(isMissingChair(session({ chair: '  ' }))).toBe(true);
+        expect(isMissingChair(session({ co_chair: null }))).toBe(false);
     });
 
     it('ignores ceremonies', () => {
-        expect(missingModerators(session({ kind: 'ceremony', spp_moderator: null, journal_moderator: null }))).toEqual([]);
+        expect(isMissingChair(session({ kind: 'ceremony', chair: null }))).toBe(false);
     });
 });
 
@@ -38,7 +39,7 @@ describe('summarize', () => {
         const summary = summarize([
             day([
                 session({
-                    journal_moderator: null,
+                    chair: null,
                     items: [
                         item({ speaker_status: 'confirmed', assets_status: 'ready' }),
                         item({ speaker_status: 'not_attending', assets_status: 'pending' }),
@@ -47,7 +48,7 @@ describe('summarize', () => {
                     ],
                 }),
             ]),
-            day([session({ kind: 'ceremony', spp_moderator: null, journal_moderator: null })]),
+            day([session({ kind: 'ceremony', chair: null })]),
         ]);
 
         expect(summary).toEqual({
@@ -58,7 +59,7 @@ describe('summarize', () => {
             assetsReady: 1,
             atRisk: 1,
             topicsTbd: 1,
-            sessionsMissingModerator: 1,
+            sessionsMissingChair: 1,
         });
     });
 });

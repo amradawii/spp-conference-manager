@@ -6,7 +6,9 @@
 <table class="item {{ $alt ? 'alt' : '' }}">
     <tr>
         <td class="time">
-            @include('pdf.partials.time', ['time' => $day->timeRange($item->starts_at, $item->ends_at)])
+            @unless ($repeatsTime)
+                @include('pdf.partials.time', ['time' => $day->timeRange($item->starts_at, $item->ends_at)])
+            @endunless
         </td>
         <td>
             @if ($item->label)
@@ -18,7 +20,7 @@
                     <p class="details">{{ $details }}</p>
                 @endif
                 @if (filled($item->title))
-                    <p class="topic">{{ $item->title }}</p>
+                    <p class="topic">{!! nl2br(e($item->title)) !!}</p>
                 @else
                     <p style="margin-top: 4pt;"><span class="tbd">Topic TBD</span></p>
                 @endif
