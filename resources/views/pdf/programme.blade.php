@@ -64,8 +64,9 @@
         .session-head, .item { page-break-inside: avoid; }
         .session-head { page-break-after: avoid; }
         .session-head td { padding: 8pt 10pt; }
-        .session-head.is-session { background: #f4f7fb; border-top: 1.5pt solid #1f4e8c; }
-        .session-head.is-plenary { background: #f5f7fa; border-top: 1.5pt solid #0b7a62; }
+        .session-head.is-session { background: #f4f7fb; border-top: 2.5pt solid #1f4e8c; }
+        .session-head.is-plenary { background: #f5f7fa; border-top: 2.5pt solid #0b7a62; }
+        .session-head .number { font-size: 9.5pt; font-weight: bold; letter-spacing: 0.8pt; text-transform: uppercase; }
         .session-head h3 { font-family: 'Source Serif', serif; font-weight: bold; font-size: 12.5pt; line-height: 1.05; margin-top: 2pt; }
         .role { margin-top: 3pt; font-size: 8.5pt; }
         .session-head h3 + .role { margin-top: 5pt; }
@@ -169,7 +170,7 @@
                                             'Journal Title' => filled($session->journal) && filled($session->title) ? '<span class="serif journal"><b>'.e($session->journal).'</b></span>' : null,
                                         ]);
                                     @endphp
-                                    <p class="caps {{ $isSession ? 'journal' : 'brand' }}">{{ $isSession ? 'Session '.$session->number : 'Plenary' }}</p>
+                                    <p class="number {{ $isSession ? 'journal' : 'brand' }}">{{ $isSession ? 'Session '.$session->number : 'Plenary' }}</p>
                                     <h3>{{ $session->title ?? $session->journal }}</h3>
                                     @foreach ($roles as $label => $value)
                                         <p class="role"><span class="caps muted">{{ $label }}</span>&nbsp;&nbsp;{!! $value !!}</p>

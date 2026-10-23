@@ -50,7 +50,7 @@
         </div>
     {/if}
 
-    <div class="mt-5 space-y-5">
+    <div class="mt-5 space-y-6">
         {#each day.sessions as session (session.id)}
             <SessionBlock {session} />
         {/each}
