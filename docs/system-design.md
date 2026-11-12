@@ -559,7 +559,9 @@ SESSION_SECURE_COOKIE=true            # session and editor-name cookies only ove
 
 ### 5.3 Production: CloudPanel VPS + auto-deploy from GitHub
 
-Every push to `main` runs `.github/workflows/deploy.yml`:
+> **Retired (Nov 2026):** after the conference the Azure server was deleted and the deploy job removed. `.github/workflows/tests.yml` now only runs the tests on pushes and pull requests. The setup below is kept for running it again: the deploy job is in `.github/workflows/deploy.yml` before commit "Remove the deploy job", and `scripts/deploy.sh` is unchanged.
+
+Every push to `main` ran `.github/workflows/deploy.yml`:
 
 ```mermaid
 flowchart LR
@@ -574,7 +576,7 @@ flowchart LR
 
 - The server never needs Node: assets are built once in CI and uploaded.
 - `.env`, `storage/` (logs, sessions, font cache) and the database are never touched by a deploy. Anything edited by hand in tracked files on the server is overwritten.
-- It can also be started by hand: GitHub → Actions → "Test and deploy" → Run workflow.
+- It could also be started by hand: GitHub → Actions → "Test and deploy" → Run workflow.
 
 **One-time server setup (CloudPanel)**
 
@@ -804,3 +806,4 @@ Each phase ends in a working, testable state.
 | 2026-10-18 | Auto-deploy with GitHub Actions: tests must pass before anything reaches the server; assets are built in CI, so the server needs no Node; `git reset --hard` + `migrate --force` + `optimize` on each push |
 | 2026-10-23 | Final programme: "SPP moderator" removed, "Journal moderator" becomes "Session Chair" (+ optional co-chair), the journal is shown as "Journal Title". Each day gets a read-only Zoom link and note on both views. The event logo sits on the right of the header and the PDF cover |
 | 2026-10-23 | The final programme reaches the live site through a migration, not `migrate:fresh`: the team link, statuses and notes survive, and the deploy needs no manual commands. Destructive artisan commands are blocked in production |
+| 2026-11-13 | Conference over: Azure server deleted to stop costs, deploy job and its secrets removed; the repo keeps the code and the seeded final programme, and CI keeps running the tests |

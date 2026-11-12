@@ -50,9 +50,9 @@ vendor/bin/pint --test  # code style
 
 ## Deployment
 
-Every push to `main` runs the tests on GitHub Actions and, if they pass, deploys to the server over SSH (`.github/workflows/deploy.yml`, `scripts/deploy.sh`). The server only needs PHP and MySQL; assets are built in CI.
+The conference is over and the live server has been retired. Every push and pull request still runs the tests on GitHub Actions (`.github/workflows/tests.yml`).
 
-First-time server setup (CloudPanel), required secrets and production rules are in [docs/system-design.md](docs/system-design.md#53-production-cloudpanel-vps--auto-deploy-from-github).
+To host it again, the server only needs PHP and MySQL. The CloudPanel setup, the former auto-deploy job, `scripts/deploy.sh` and the production rules are described in [docs/system-design.md](docs/system-design.md#53-production-cloudpanel-vps--auto-deploy-from-github).
 
 ## Documentation
 
